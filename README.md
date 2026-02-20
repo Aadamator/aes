@@ -19,10 +19,15 @@
   - [2.2. Setup](#22-setup)
     - [2.2.1. Using CMake](#221-using-cmake)
     - [2.2.2. Using GNU Make (Recommended)](#222-using-gnu-make-recommended)
-* [3. Appendix](#-3-appendix)
-  - [3.1. Projects](#31-implementations)
-  - [3.2. Useful commands](#32-useful-commands)
-* [4. License](#-4-license)
+* [3. Testing and Benchmarking](#-3-testing-and-benchmarking)
+  - [3.1. Unit Tests](#31-unit-tests)
+    - [3.1.1. Using CTest](#311-using-ctest)
+    - [3.1.2. Using GNU Make (Recommended)](#312-using-gnu-make-recommended)
+  - [3.2. Benchmarking](#32-benchmarking)
+* [4. Appendix](#-4-appendix)
+  - [4.1. Projects](#41-implementations)
+  - [4.2. Useful commands](#42-useful-commands)
+* [5. License](#-5-license)
 
 ## 🔭 1. Overview
 
@@ -104,9 +109,43 @@ $ make
 
 <sup>[Back to top ^][table-of-contents]</sup>
 
-## 📑 3. Appendix
+## 📊 3. Testing and Benchmarking
 
-### 3.1. Implementations
+### 3.1. Unit Tests
+
+Unit tests are located in the [`tests/`](./tests/) directory and are implemented using [Unity](https://github.com/ThrowTheSwitch/Unity).
+
+<sup>[Back to top ^][table-of-contents]</sup>
+
+#### 3.1.1. Using CTest
+
+1. Ensure that the build directory is configured and built as described in [2.2.1. Using CMake](#221-using-cmake).
+
+2. Run the unit tests:
+```bash
+$ ctest --test-dir build
+```
+
+<sup>[Back to top ^][table-of-contents]</sup>
+
+#### 3.1.2. Using GNU Make (Recommended)
+
+1. Ensure that the build directory is configured and built as described in [2.2.2. Using GNU Make](#222-using-gnu-make-recommended).
+
+2. Run the unit tests:
+```bash
+$ make test
+```
+
+### 3.2. Benchmarking
+
+TBC...
+
+<sup>[Back to top ^][table-of-contents]</sup>
+
+## 📑 4. Appendix
+
+### 4.1. Implementations
 
 | Name                                       | Description                                          |
 |--------------------------------------------|------------------------------------------------------|
@@ -115,7 +154,7 @@ $ make
 | [`t_tables`](./impls/t_tables/aes_128.c)   | The optimized implementation using T-tables.         |
 | [`aes_ni`](./impls/aes_ni/aes_128.c)       | The optimized implementation using utilizing AES-NI. |
 
-### 3.2. Useful commands
+### 4.2. Useful commands
 
 | Name                                                                      | Description                                                                                                              |
 |---------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------|
@@ -127,7 +166,7 @@ $ make
 
 <sup>[Back to top ^][table-of-contents]</sup>
 
-## 📄 4. License
+## 📄 5. License
 
 Please refer to the [LICENSE][license] file.
 

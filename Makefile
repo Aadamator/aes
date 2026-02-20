@@ -18,11 +18,11 @@ configure: clean
 	@echo ">>> Configuring $(BUILD_DIR)/ directory"
 	$(CMAKE) -S . -B $(BUILD_DIR)
 
-test: build
+test:
 	@echo ">>> Running all unit tests"
 	$(CTEST) --test-dir $(BUILD_DIR)
 
-test_naive: build
+test_naive:
 	@echo ">>> Running naive implementation unit tests"
 	$(CTEST) --test-dir $(BUILD_DIR) -R naive
 
