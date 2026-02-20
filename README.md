@@ -26,7 +26,7 @@
 
 ## 🔭 1. Overview
 
-## 1.1 Introduction
+### 1.1 Introduction
 
 The Advanced Encryption Standard (AES) is one of the most used (if not the most used) current cryptographic algorithms. It has been designed from the ground up to be efficiently implementable in software. Nonetheless, due to its widespread use, it has become common for CPU to have dedicated hardware instructions (AES-NI) that allow for an even faster implementation of AES.
 
@@ -38,6 +38,8 @@ This repo uses a pseudo-monorepo structure:
 
 ```text
 .
+├─ docs/
+│   └── ...
 ├─ impls/
 │   ├── <aes_implementation>/
 │   │   ├── aes_128.c           <-- The AES-128 implementation.
@@ -121,7 +123,7 @@ $ make
 | `cmake --build build`/`make build`                                        | Compiles the source files to the `build/` directory.                                                                     |
 | `ctest --test-dir build`/`make test`                                      | Runs unit tests for all implementations.                                                                                 |
 | `ctest --test-dir build -R <implementation>`/`make test_<implementation>` | Runs unit tests for a specific implementation, one of: <br/>* `naive`<br/>* `optimized`<br/>* `t_tables`<br/>* `aes_ni`. |
-| `make update`                                                             | Re-configures the build directory - useful for when you want to cache previously downloaded dependencies.                |
+| `make update`                                                             | Re-configures the build directory - useful for caching previously downloaded dependencies.                               |
 
 <sup>[Back to top ^][table-of-contents]</sup>
 
