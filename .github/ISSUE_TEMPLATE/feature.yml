@@ -1,0 +1,36 @@
+name: "Feature"
+description: "For implementation, setup, or maintenance of features."
+title: "[✨ Feature] "
+labels: ["✨ feature"]
+body:
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: What needs to be done? Include goals and success criteria.
+      placeholder: |
+        e.g. "Set up initial repo structure..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: subtasks
+    attributes:
+      label: Sub-tasks
+      description: Break into required/optional steps with checkboxes.
+      placeholder: |
+        Required:
+        - [ ] Implement naive AES implementation.
+        - [ ] Unit tests.
+
+        Optional:
+        - [ ] Documentation explaining the algorithm.
+    validations:
+      required: true
+
+  - type: textarea
+    id: technical_notes
+    attributes:
+      label: Technical Notes
+      description: Any technical details.
+      placeholder: e.g., "Use CMake for build system."
