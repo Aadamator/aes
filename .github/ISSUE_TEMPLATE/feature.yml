@@ -14,21 +14,6 @@ body:
       required: true
 
   - type: textarea
-    id: subtasks
-    attributes:
-      label: Sub-tasks
-      description: Break into required/optional steps with checkboxes.
-      placeholder: |
-        Required:
-        - [ ] Implement naive AES implementation.
-        - [ ] Unit tests.
-
-        Optional:
-        - [ ] Documentation explaining the algorithm.
-    validations:
-      required: true
-
-  - type: textarea
     id: technical_notes
     attributes:
       label: Technical Notes
