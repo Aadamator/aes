@@ -1,0 +1,33 @@
+name: "Pull Request Checks"
+
+on:
+  pull_request:
+
+jobs:
+  build:
+    name: "Build"
+    runs-on: ubuntu-latest
+    steps:
+      - name: "🛎 Checkout"
+        uses: actions/checkout@v4
+      - name: "🔧 Setup C Toolchain"
+        uses: ./.github/actions/use-c-toolchain
+      - name: "🔧 Configure"
+        run: make configure
+      - name: "🏗️ Build"
+        run: make build
+
+  test:
+    name: "Test"
+    runs-on: ubuntu-latest
+    steps:
+      - name: "🛎 Checkout"
+        uses: actions/checkout@v4
+      - name: "🔧 Setup C Toolchain"
+        uses: ./.github/actions/use-c-toolchain
+      - name: "🔧 Configure"
+        run: make configure
+      - name: "🏗️ Build"
+        run: make build
+      - name: "🧪 Test"
+        run: make test
