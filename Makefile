@@ -20,11 +20,11 @@ configure: clean
 
 test:
 	@echo ">>> Running all unit tests"
-	$(CTEST) --test-dir $(BUILD_DIR)
+	$(CTEST) --test-dir $(BUILD_DIR) --output-on-failure
 
 test_naive:
 	@echo ">>> Running naive implementation unit tests"
-	$(CTEST) --test-dir $(BUILD_DIR) -R naive
+	$(CTEST) --test-dir $(BUILD_DIR) -R naive --output-on-failure
 
 update:
 	@echo ">>> Re-configuring $(BUILD_DIR)/ directory"
