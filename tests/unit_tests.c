@@ -4,6 +4,8 @@
 #include "unity.h"
 #include "sodium.h"
 
+#define NUM_ROUNDS 10
+
 typedef struct {
     char start[33];
     char s_box[33];
@@ -15,7 +17,7 @@ typedef struct {
 static const char ciphertext_as_hex[33] = "3925841d02dc09fbdc118597196a0b32";
 static const char key_as_hex[33] = "2b7e151628aed2a6abf7158809cf4f3c";
 static const char plaintext_as_hex[33] = "3243f6a8885a308d313198a2e0370734";
-static const RoundState round_states[10] = {
+static const RoundState round_states[NUM_ROUNDS] = {
     // R[01]
     {
         "193de3bea0f4e22b9ac68d2ae9f84808", // start
@@ -148,7 +150,7 @@ void test_single_round(
     TEST_ASSERT_EQUAL_UINT8_ARRAY(expected, state, 16);
 
     // R[n].m_col (only mix columns on rounds 1-9)
-    if (round < 10) {
+    if (round < NUM_ROUNDS) {
         sodium_hex2bin(
         expected,
         sizeof(expected),
@@ -168,14 +170,14 @@ void test_single_round(
         strlen(round_state->k_sch),
         NULL, NULL, NULL);
     TEST_ASSERT_EQUAL_UINT8_ARRAY(expected, key_schedule, 16);
-    add_round_key(state, key_schedule);
+    add_round_key(key_schedule, state);
 }
 
 /**
  * Test the full end-to-end functionality of AES-128 implementation using known plaintext ->
  * ciphertext
  */
-static void test_aes_128_encrypt(void) {
+static void test_encrypt(void) {
     uint8_t expected_ciphertext[16] = {0};
     uint8_t ciphertext[16] = {0};
     uint8_t key[16] = {0};
@@ -200,7 +202,7 @@ static void test_aes_128_encrypt(void) {
         strlen(plaintext_as_hex),
         NULL, NULL, NULL);
 
-    aes_128_encrypt(key, plaintext, ciphertext);
+    encrypt(key, plaintext, ciphertext);
 
     TEST_ASSERT_EQUAL_UINT8_ARRAY(expected_ciphertext, ciphertext, 16);
 }
@@ -211,7 +213,7 @@ static void test_aes_128_encrypt(void) {
 static void test_rounds() {
     uint8_t expected[16] = {0};
     uint8_t key[16] = {0};
-    uint8_t round_keys[11][16]; // 16 bytes * 11
+    uint8_t round_keys[11][16]; // 16 bytes * 11 (0-10)
     uint8_t state[16] = {0};
 
     sodium_hex2bin(
@@ -234,7 +236,7 @@ static void test_rounds() {
     key_expansion(key, round_keys);
 
     // initialize for R[00] - before the rounds
-    add_round_key(state, round_keys[0]);
+    add_round_key(round_keys[0], state);
     sodium_hex2bin(
         expected,
         16,
@@ -245,7 +247,7 @@ static void test_rounds() {
     TEST_ASSERT_EQUAL_UINT8_ARRAY(expected, state, 16);
 
     // iterate each round updating the state
-    for (int i = 0; i < 10; i++) {
+    for (int i = 0; i < NUM_ROUNDS; i++) {
         test_single_round(i, round_keys, state);
     }
 
@@ -263,7 +265,7 @@ static void test_rounds() {
 int main(void) {
     UNITY_BEGIN();
 
-    RUN_TEST(test_aes_128_encrypt);
+    RUN_TEST(test_encrypt);
     RUN_TEST(test_rounds);
 
     return UNITY_END();
