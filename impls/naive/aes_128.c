@@ -28,7 +28,7 @@ int encrypt(const uint8_t key[16], const uint8_t plaintext[16], uint8_t cipherte
     // begin with a key addition
     add_round_key(key_schedules[0], state);
 
-    // ROUNDS-1 ordinary rounds
+    // rounds 1-9 are ordinary rounds
     for (int round = 1; round < 10; round++) {
         sub_bytes(state);
         shift_rows(direction, state);
@@ -121,11 +121,37 @@ void shift_rows(const int direction, uint8_t state[16]) {
 
     }
 
-    // Back to flat state
+    // back to flat state
     state[0]  = rows[0][0]; state[ 4] = rows[0][1]; state[ 8] = rows[0][2]; state[12] = rows[0][3];
     state[1]  = rows[1][0]; state[ 5] = rows[1][1]; state[ 9] = rows[1][2]; state[13] = rows[1][3];
     state[2]  = rows[2][0]; state[ 6] = rows[2][1]; state[10] = rows[2][2]; state[14] = rows[2][3];
     state[3]  = rows[3][0]; state[ 7] = rows[3][1]; state[11] = rows[3][2]; state[15] = rows[3][3];
+
+    // const int shifts[4] = {0, 1, 2, 3};
+    // int i, j;
+    // uint8_t tmp[4];
+    //
+    // if (direction == 0) {
+    //     for (i = 1; i < 4; i++) {
+    //         for (j = 0; j < 4; j++) {
+    //             tmp[j] = state[4*i + (j + shifts[i]) % 4];
+    //         }
+    //
+    //         for (j = 0; j < 4; j++) {
+    //             state[4*i + j] = tmp[j];
+    //         }
+    //     }
+    // } else {
+    //     for (i = 1; i < 4; i++) {
+    //         for (j = 0; j < 4; j++) {
+    //             tmp[j] = state[4*i + (4 + j - shifts[i]) % 4];
+    //         }
+    //
+    //         for (j = 0; j < 4; j++) {
+    //             state[4*i + j] = tmp[j];
+    //         }
+    //     }
+    // }
 }
 
 void sub_bytes(uint8_t state[16]) {
