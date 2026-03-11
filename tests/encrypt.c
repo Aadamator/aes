@@ -100,8 +100,33 @@ static const RoundState round_states[NUM_ROUNDS] = {
     },
 };
 
-void setUp(void) {}
-void tearDown(void) {}
+static void assert_round_state(
+    const uint8_t expected[16],
+    const uint8_t actual[16],
+    const int round,
+    const char *step
+) {
+    char actual_as_hex[33];
+    char expected_as_hex[33];
+    char message[128];
+
+    sodium_bin2hex(
+        actual_as_hex,
+        sizeof(actual_as_hex),
+        actual,
+        16
+    );
+    sodium_bin2hex(
+        expected_as_hex,
+        sizeof(expected_as_hex),
+        expected,
+        16
+    );
+
+    snprintf(message, sizeof(message), "R[%d].%s mismatch: expected \"%s\", actual \"%s\"",
+        round, step, expected_as_hex, actual_as_hex);
+    TEST_ASSERT_EQUAL_UINT8_ARRAY_MESSAGE(expected, actual, 16, message);
+}
 
 /**
  * Test for a single round of AES-128 encryption based on the test vectors in Appendix B. of "The
@@ -111,11 +136,12 @@ void tearDown(void) {}
  * @param key_schedules The expanded key schedules.
  * @param state         The current state of the AES-128 encryption.
  */
-void test_single_round(
+static void test_single_round(
     const int round,
     const uint8_t key_schedules[11][16],
     uint8_t state[16]
 ) {
+    const int direction = 0;
     const RoundState *round_state = &round_states[round];
     uint8_t expected[16] = {0};
     uint8_t key_schedule[16] = {0};
@@ -127,7 +153,7 @@ void test_single_round(
         round_state->start,
         strlen(round_state->start),
         NULL, NULL, NULL);
-    TEST_ASSERT_EQUAL_UINT8_ARRAY(expected, state, 16);
+    assert_round_state(expected, state, round + 1, "start");
 
     // R[n].s_box
     sodium_hex2bin(
@@ -137,7 +163,7 @@ void test_single_round(
         strlen(round_state->s_box),
         NULL, NULL, NULL);
     sub_bytes(state);
-    TEST_ASSERT_EQUAL_UINT8_ARRAY(expected, state, 16);
+    assert_round_state(expected, state, round + 1, "s_box");
 
     // R[n].s_row
     sodium_hex2bin(
@@ -146,11 +172,11 @@ void test_single_round(
         round_state->s_row,
         strlen(round_state->s_row),
         NULL, NULL, NULL);
-    shift_rows(state);
-    TEST_ASSERT_EQUAL_UINT8_ARRAY(expected, state, 16);
+    shift_rows(direction, state);
+    assert_round_state(expected, state, round + 1, "s_row");
 
     // R[n].m_col (only mix columns on rounds 1-9)
-    if (round < NUM_ROUNDS) {
+    if (round < NUM_ROUNDS - 1) {
         sodium_hex2bin(
         expected,
         sizeof(expected),
@@ -158,7 +184,7 @@ void test_single_round(
         strlen(round_state->m_col),
         NULL, NULL, NULL);
         mix_columns(state);
-        TEST_ASSERT_EQUAL_UINT8_ARRAY(expected, state, 16);
+        assert_round_state(expected, state, round + 1, "m_col");
     }
 
     // R[n].k_sch
@@ -169,7 +195,7 @@ void test_single_round(
         round_state->k_sch,
         strlen(round_state->k_sch),
         NULL, NULL, NULL);
-    TEST_ASSERT_EQUAL_UINT8_ARRAY(expected, key_schedule, 16);
+    assert_round_state(expected, key_schedule, round + 1, "k_sch");
     add_round_key(key_schedule, state);
 }
 
@@ -244,6 +270,7 @@ static void test_rounds() {
         32,
         NULL, NULL, NULL
     );
+    assert_round_state(expected, state, 0, "start");
     TEST_ASSERT_EQUAL_UINT8_ARRAY(expected, state, 16);
 
     // iterate each round updating the state
@@ -259,8 +286,12 @@ static void test_rounds() {
         strlen(ciphertext_as_hex),
         NULL, NULL, NULL
     );
-    TEST_ASSERT_EQUAL_UINT8_ARRAY(expected, state, 16);
+    assert_round_state(expected, state, NUM_ROUNDS, "output");
 }
+
+// unity lifecycle functions
+void setUp(void) {}
+void tearDown(void) {}
 
 int main(void) {
     UNITY_BEGIN();

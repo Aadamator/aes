@@ -14,6 +14,6 @@ void key_expansion(const uint8_t cipherkey[16], uint8_t key_schedules[11][16]) {
 
 void mix_columns(uint8_t state[16]) {}
 
-void shift_rows(uint8_t state[16]) {}
+void shift_rows(const int direction, uint8_t state[16]) {}
 
 void sub_bytes(uint8_t state[16]) {}

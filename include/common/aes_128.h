@@ -42,9 +42,10 @@ void mix_columns(uint8_t state[16]);
 /**
  * @brief Row 0 remains unchanged, but the other three rows are shifted a variable amount.
  *
+ * @param direction     For encryption (0) or decryption (1+).
  * @param state         16-byte current ciphertext.
  */
-void shift_rows(uint8_t state[16]);
+void shift_rows(int direction, uint8_t state[16]);
 
 /**
  * @brief Substitute each byte of the state with another byte according to a lookup table.

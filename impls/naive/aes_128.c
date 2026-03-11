@@ -1,19 +1,135 @@
 #include <stdint.h>
-#include "aes_128.h"
+#include <string.h>
 
-void add_round_key(const uint8_t round_key[16], uint8_t state[16]) {}
+#include "aes_128.h"
+#include "constants.h"
+
+static uint8_t xtime(uint8_t x) {
+    return (x << 1) ^ (((x >> 7) & 1) * 0x1b);
+}
+
+void add_round_key(const uint8_t round_key[16], uint8_t state[16]) {
+    for (int i = 0; i < 16; i++) {
+        state[i] ^= round_key[i];
+    }
+}
 
 int encrypt(const uint8_t key[16], const uint8_t plaintext[16], uint8_t ciphertext[16]) {
-    // placeholder, just returns the plaintext
-    for (int i = 0; i < 16; ++i) ciphertext[i] = plaintext[i];
+    const int direction = 0;
+    uint8_t state[16];
+    uint8_t key_schedules[11][16];
+
+    // initialize state with plaintext
+    memcpy(state, plaintext, 16);
+
+    // create key schedules
+    key_expansion(key, key_schedules);
+
+    // begin with a key addition
+    add_round_key(key_schedules[0], state);
+
+    // ROUNDS-1 ordinary rounds
+    for (int round = 1; round < 10; round++) {
+        sub_bytes(state);
+        shift_rows(direction, state);
+        mix_columns(state);
+        add_round_key(key_schedules[round], state);
+    }
+
+    // last round is special: there is no mix_columns
+    sub_bytes(state);
+    shift_rows(direction, state);
+    add_round_key(key_schedules[10], state);
+
+    // copy the state to the ciphertext
+    memcpy(ciphertext, state, 16);
 
     return 0;
 }
 
-void key_expansion(const uint8_t cipherkey[16], uint8_t key_schedules[11][16]) {}
+void key_expansion(const uint8_t cipherkey[16], uint8_t key_schedules[11][16]) {
+    // Copy cipher key to K0
+    memcpy(key_schedules[0], cipherkey, 16);
 
-void mix_columns(uint8_t state[16]) {}
+    for (int i = 1; i < 11; i++) {
+        uint8_t temp[4];
+        memcpy(temp, key_schedules[i-1] + 12, 4);  // Last column
 
-void shift_rows(uint8_t state[16]) {}
+        // RotWord
+        uint8_t t = temp[0];
+        temp[0] = temp[1]; temp[1] = temp[2]; temp[2] = temp[3]; temp[3] = t;
 
-void sub_bytes(uint8_t state[16]) {}
+        // SubWord
+        temp[0] = s_box[temp[0]];
+        temp[1] = s_box[temp[1]];
+        temp[2] = s_box[temp[2]];
+        temp[3] = s_box[temp[3]];
+
+        // XOR Rcon
+        temp[0] ^= round_constants[i-1];
+
+        // K[i] = K[i-1] XOR (transformed word || 0)
+        for (int j = 0; j < 4; j++) {
+            key_schedules[i][j] = key_schedules[i-1][j] ^ temp[j];
+        }
+        for (int j = 4; j < 16; j++) {
+            key_schedules[i][j] = key_schedules[i-1][j] ^ key_schedules[i][j-4];
+        }
+    }
+}
+
+void mix_columns(uint8_t state[16]) {
+    for (int col = 0; col < 4; col++) {
+        uint8_t col_state[4] = {state[col*4], state[col*4+1], state[col*4+2], state[col*4+3]};
+        uint8_t col_out[4];
+
+        // Mc matrix: {2,3,1,1}, {1,2,3,1}, {1,1,2,3}, {3,1,1,2}
+        col_out[0] = xtime(col_state[0]) ^ xtime(col_state[1]) ^ col_state[1] ^ col_state[2] ^ col_state[3];
+        col_out[1] = col_state[0] ^ xtime(col_state[1]) ^ xtime(col_state[2]) ^ col_state[2] ^ col_state[3];
+        col_out[2] = col_state[0] ^ col_state[1] ^ xtime(col_state[2]) ^ xtime(col_state[3]) ^ col_state[3];
+        col_out[3] = xtime(col_state[0]) ^ col_state[0] ^ col_state[1] ^ col_state[2] ^ xtime(col_state[3]);
+
+        state[col*4+0] = col_out[0];
+        state[col*4+1] = col_out[1];
+        state[col*4+2] = col_out[2];
+        state[col*4+3] = col_out[3];
+    }
+}
+
+void shift_rows(const int direction, uint8_t state[16]) {
+    uint8_t rows[4][4] = {
+        {state[0], state[4], state[8], state[12]},   // Row 0
+        {state[1], state[5], state[9], state[13]},   // Row 1
+        {state[2], state[6], state[10], state[14]},  // Row 2
+        {state[3], state[7], state[11], state[15]}   // Row 3
+    };
+
+    // encryption (direction=0)
+    if (direction == 0) {
+        for (int i = 1; i < 4; i++) {  // Rows 1-3
+            int j = 0;
+            uint8_t tmp[4];
+
+            for (j = 0; j < 4; j++) {
+                tmp[j] = rows[i][(j + i) % 4];  // shifts[0][i] = i (0,1,2,3)
+            }
+            for (j = 0; j < 4; j++) {
+                rows[i][j] = tmp[j];
+            }
+        }
+    } else {
+
+    }
+
+    // Back to flat state
+    state[0]  = rows[0][0]; state[ 4] = rows[0][1]; state[ 8] = rows[0][2]; state[12] = rows[0][3];
+    state[1]  = rows[1][0]; state[ 5] = rows[1][1]; state[ 9] = rows[1][2]; state[13] = rows[1][3];
+    state[2]  = rows[2][0]; state[ 6] = rows[2][1]; state[10] = rows[2][2]; state[14] = rows[2][3];
+    state[3]  = rows[3][0]; state[ 7] = rows[3][1]; state[11] = rows[3][2]; state[15] = rows[3][3];
+}
+
+void sub_bytes(uint8_t state[16]) {
+    for (int i = 0; i < 16; i++) {
+        state[i] = s_box[state[i]];
+    }
+}

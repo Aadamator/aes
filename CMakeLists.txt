@@ -20,6 +20,7 @@ FetchContent_MakeAvailable(Sodium)
 enable_testing()
 
 # add source directories
+add_subdirectory(lib)
 add_subdirectory(include/common)
 add_subdirectory(impls/naive)
 add_subdirectory(impls/optimized)
