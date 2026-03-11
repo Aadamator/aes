@@ -57,8 +57,14 @@ This repo uses a pseudo-monorepo structure:
 │   │   ├── CMakeLists.txt      <-- Header declarations.
 │   │   └── ...
 │   └── ...
+├─ lib/
+│   ├── constants.h
+│   ├── constants.c             <-- Common constants used across each implementation, e.g. S-boxes.
+│   ├── CMakeLists.txt          <-- Header declarations and public linking.
+│   └── ...
 ├─ tests/
-│   ├── unit_tests.c            <-- Unit tests to test AES-128 implementation(s).
+│   ├── decrypt.c               <-- Unit tests to test AES-128 decryption implementation(s).
+│   ├── encrypt.c               <-- Unit tests to test AES-128 encryption implementation(s).
 │   ├── CMakeLists.txt          <-- Defines test executables and registers them with CTest.
 │   └── ...
 ├── .editorconfig               <-- Editor configuration file.
