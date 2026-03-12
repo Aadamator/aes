@@ -3,6 +3,7 @@
 
 #include "aes_128.h"
 #include "constants.h"
+#include "state_utils.h"
 
 static uint8_t xtime(uint8_t x) {
     return (x << 1) ^ (((x >> 7) & 1) * 0x1b);
@@ -97,61 +98,40 @@ void mix_columns(uint8_t state[16]) {
 }
 
 void shift_rows(const int direction, uint8_t state[16]) {
-    uint8_t rows[4][4] = {
-        {state[0], state[4], state[8], state[12]},   // Row 0
-        {state[1], state[5], state[9], state[13]},   // Row 1
-        {state[2], state[6], state[10], state[14]},  // Row 2
-        {state[3], state[7], state[11], state[15]}   // Row 3
-    };
+    const int nb = 4; // Nb = 4 (number of columns) for 16-byte (128-bit)
+    const uint8_t shifts[4] = {0, 1, 2, 3}; // Nb = 4 (AES-128)
+    int i;
+    int j;
+    uint8_t matrix[4][4];
+    uint8_t tmp[nb];
+
+    map_from_bytes(state, matrix);
 
     // encryption (direction=0)
     if (direction == 0) {
-        for (int i = 1; i < 4; i++) {  // Rows 1-3
-            int j = 0;
-            uint8_t tmp[4];
-
-            for (j = 0; j < 4; j++) {
-                tmp[j] = rows[i][(j + i) % 4];  // shifts[0][i] = i (0,1,2,3)
+        for (i = 1; i < 4; i++) {
+            for (j = 0; j < nb; j++) {
+                tmp[j] = matrix[i][(j + shifts[i]) % nb];
             }
-            for (j = 0; j < 4; j++) {
-                rows[i][j] = tmp[j];
+
+            for (j = 0; j < nb; j++) {
+                matrix[i][j] = tmp[j];
             }
         }
     } else {
+        for (i = 1; i < 4; i++) {
+            for (j = 0; j < nb; j++) {
+                tmp[j] = matrix[i][(nb + j - shifts[i]) % nb];
+            }
 
+            for (j = 0; j < nb; j++) {
+                matrix[i][j] = tmp[j];
+            }
+        }
     }
 
     // back to flat state
-    state[0]  = rows[0][0]; state[ 4] = rows[0][1]; state[ 8] = rows[0][2]; state[12] = rows[0][3];
-    state[1]  = rows[1][0]; state[ 5] = rows[1][1]; state[ 9] = rows[1][2]; state[13] = rows[1][3];
-    state[2]  = rows[2][0]; state[ 6] = rows[2][1]; state[10] = rows[2][2]; state[14] = rows[2][3];
-    state[3]  = rows[3][0]; state[ 7] = rows[3][1]; state[11] = rows[3][2]; state[15] = rows[3][3];
-
-    // const int shifts[4] = {0, 1, 2, 3};
-    // int i, j;
-    // uint8_t tmp[4];
-    //
-    // if (direction == 0) {
-    //     for (i = 1; i < 4; i++) {
-    //         for (j = 0; j < 4; j++) {
-    //             tmp[j] = state[4*i + (j + shifts[i]) % 4];
-    //         }
-    //
-    //         for (j = 0; j < 4; j++) {
-    //             state[4*i + j] = tmp[j];
-    //         }
-    //     }
-    // } else {
-    //     for (i = 1; i < 4; i++) {
-    //         for (j = 0; j < 4; j++) {
-    //             tmp[j] = state[4*i + (4 + j - shifts[i]) % 4];
-    //         }
-    //
-    //         for (j = 0; j < 4; j++) {
-    //             state[4*i + j] = tmp[j];
-    //         }
-    //     }
-    // }
+    map_to_bytes(matrix, state);
 }
 
 void sub_bytes(uint8_t state[16]) {
