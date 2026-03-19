@@ -1,0 +1,55 @@
+\subsection{Naive Implementation of AES-128}
+
+The naive implementation of our AES-128 algorithm is heavily inspired by the implementation of Rijndael/AES in the book \textit{The Design of Rijndael} \cite{rijndael}. This implementation sets the stage for the structure of the subsequent implementations by decomposing into the same conceptual steps as specified in the book, namely; \texttt{sub\_bytes}, \texttt{shift\_rows}, \texttt{mix\_columns}, and \texttt{add\_round\_key}. 
+
+In contrast to the more general Rijndael description in the book \cite{rijndael},
+our implementation is restricted to the AES-128 variant, and therefore
+only considers the case $N_{b} = 4$ (corresponding to a 128-bit block).
+
+Using the test vectors from the book \cite{rijndael_test_vectors}, we tested not only full end-to-end encryption/decryption, but also the intermediate states before/after each transformation step at each round. Because every transformation step is a separate testable function, we can evaluate these known intermediate states and assert that the output matches the published state for that step.
+
+This makes the implementation closely follow the "textbook" structure and our unit testing approach also allows us to isolate regressions by having fine-grained tests that fail as soon as a single transformation deviates, rather than only detecting mismatches at the final ciphertext.
+
+\subsection{Optimized Implementation of AES-128}
+
+\subsection{Implementation of AES-NI}
+
+\subsection{Implementation of AES-128 using T-tables}
+
+\subsection{Benchmarking}
+
+To benchmark our AES-128 implementations, we used libsodium's \cite{libsodium_ip_address_encryption} AES-128 single-block encryption (through its \texttt{crypto\_ipcrypt} API) and we used Google's Benchmark \cite{google_benchmark} to measure single-block encryption latency. 
+
+Each implementation was tested with 1,000,000 iterations, reporting both mean and median latencies in clock cycles. The mean provides the average performance across all runs (sensitive to occasional outliers), while the median gives a more robust central tendency by discarding extreme measurements, making it ideal for comparing consistent real-world performance. 
+
+All tests ran on the same hardware with compiler optimizations disabled to isolate algorithmic differences.
+
+\begin{center}
+    \begin{tabular}{|l|c|c|c|} 
+        \hline
+            \textbf{Implementation} &
+            \textbf{Mean Latency} &
+            \textbf{Median Latency} \\ [0.5ex]
+        \hline\hline
+            Naive &
+            42.1 ns/op &
+            42.1 ns/op \\
+        \hline
+            Optimized &
+            42.1 ns/op &
+            42.1 ns/op \\
+        \hline
+            AES-NI &
+            42.1 ns/op &
+            42.1 ns/op \\ 
+        \hline
+            Using T-tables &
+            42.1 ns/op &
+            42.1 ns/op \\ 
+        \hline
+            libsodium &
+            42.1 ns/op &
+            42.1 ns/op \\ 
+        \hline 
+    \end{tabular}
+\end{center}
