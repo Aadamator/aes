@@ -3,20 +3,8 @@
 #include "aes_128.h"
 #include "unity.h"
 #include "sodium.h"
+#include "test_utils.h"
 
-#define NUM_ROUNDS 10
-
-typedef struct {
-    char start[33];
-    char s_box[33];
-    char s_row[33];
-    char m_col[33];
-    char k_sch[33];
-} RoundState;
-
-static const char ciphertext_as_hex[33] = "3925841d02dc09fbdc118597196a0b32";
-static const char key_as_hex[33] = "2b7e151628aed2a6abf7158809cf4f3c";
-static const char plaintext_as_hex[33] = "3243f6a8885a308d313198a2e0370734";
 static const RoundState round_states[NUM_ROUNDS] = {
     // R[01]
     {
@@ -100,34 +88,6 @@ static const RoundState round_states[NUM_ROUNDS] = {
     },
 };
 
-static void assert_round_state(
-    const uint8_t expected[16],
-    const uint8_t actual[16],
-    const int round,
-    const char *step
-) {
-    char actual_as_hex[33];
-    char expected_as_hex[33];
-    char message[128];
-
-    sodium_bin2hex(
-        actual_as_hex,
-        sizeof(actual_as_hex),
-        actual,
-        16
-    );
-    sodium_bin2hex(
-        expected_as_hex,
-        sizeof(expected_as_hex),
-        expected,
-        16
-    );
-
-    snprintf(message, sizeof(message), "R[%d].%s mismatch: expected \"%s\", actual \"%s\"",
-        round, step, expected_as_hex, actual_as_hex);
-    TEST_ASSERT_EQUAL_UINT8_ARRAY_MESSAGE(expected, actual, 16, message);
-}
-
 /**
  * Test for a single round of AES-128 encryption based on the test vectors in Appendix B. of "The
  * design of Rijndael: the advanced encryption standard (AES)".
@@ -141,7 +101,6 @@ static void test_single_round(
     const uint8_t key_schedules[11][16],
     uint8_t state[16]
 ) {
-    const int direction = 0;
     const RoundState *round_state = &round_states[round];
     uint8_t expected[16] = {0};
     uint8_t key_schedule[16] = {0};
@@ -172,7 +131,7 @@ static void test_single_round(
         round_state->s_row,
         strlen(round_state->s_row),
         NULL, NULL, NULL);
-    shift_rows(direction, state);
+    shift_rows(state);
     assert_round_state(expected, state, round + 1, "s_row");
 
     // R[n].m_col (only mix columns on rounds 1-9)
