@@ -54,13 +54,6 @@ void inverse_mix_columns(uint8_t state[16]);
 void inverse_shift_rows(uint8_t state[16]);
 
 /**
- * @brief Inverse sub bytes operation.
- *
- * @param state         16-byte current ciphertext.
- */
-void inverse_sub_bytes(uint8_t state[16]);
-
-/**
  * @brief Precompute the key schedules from the cipher key.
  *
  * @param cipherkey     16-byte cipher key.
@@ -81,10 +74,3 @@ void mix_columns(uint8_t state[16]);
  * @param state         16-byte current ciphertext.
  */
 void shift_rows(uint8_t state[16]);
-
-/**
- * @brief Substitute each byte of the state with another byte according to a lookup table.
- *
- * @param state         16-byte current ciphertext.
- */
-void sub_bytes(uint8_t state[16]);
