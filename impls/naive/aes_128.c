@@ -5,6 +5,7 @@
 
 #include "constants.h"
 #include "gf.h"
+#include "s_box.h"
 #include "state_utils.h"
 
 static const uint8_t shifts[4] = {0, 1, 2, 3}; // Nb = 4 (AES-128)
@@ -129,12 +130,6 @@ void inverse_shift_rows(uint8_t state[16]) {
     map_to_bytes(matrix, state);
 }
 
-void inverse_sub_bytes(uint8_t state[16]) {
-    for (int i = 0; i < 16; i++) {
-        state[i] = inverse_s_box[state[i]];
-    }
-}
-
 void key_expansion(const uint8_t cipherkey[16], uint8_t key_schedules[11][16]) {
     // copy cipher key to the first position
     memcpy(key_schedules[0], cipherkey, 16);
@@ -215,10 +210,4 @@ void shift_rows(uint8_t state[16]) {
 
     // back to flat state
     map_to_bytes(matrix, state);
-}
-
-void sub_bytes(uint8_t state[16]) {
-    for (int i = 0; i < 16; i++) {
-        state[i] = s_box[state[i]];
-    }
 }

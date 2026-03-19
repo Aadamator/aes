@@ -2,6 +2,7 @@
 
 #include "aes_128.h"
 #include "unity.h"
+#include "s_box.h"
 #include "sodium.h"
 #include "test_utils.h"
 
