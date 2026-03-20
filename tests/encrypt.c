@@ -22,7 +22,7 @@ static void test_single_round(
     const uint8_t key_schedules[11][16],
     uint8_t state[16]
 ) {
-    const RoundState *round_state = &round_states[round];
+    const RoundState *round_state = &round_states[round - 1];
     uint8_t expected[16] = {0};
     uint8_t key_schedule[16] = {0};
 
@@ -33,7 +33,7 @@ static void test_single_round(
         round_state->start,
         strlen(round_state->start),
         NULL, NULL, NULL);
-    assert_round_state(expected, state, round + 1, "start");
+    assert_round_state(expected, state, round, "start");
 
     // R[n].s_box
     sodium_hex2bin(
@@ -43,7 +43,7 @@ static void test_single_round(
         strlen(round_state->s_box),
         NULL, NULL, NULL);
     sub_bytes(state);
-    assert_round_state(expected, state, round + 1, "s_box");
+    assert_round_state(expected, state, round, "s_box");
 
     // R[n].s_row
     sodium_hex2bin(
@@ -53,10 +53,10 @@ static void test_single_round(
         strlen(round_state->s_row),
         NULL, NULL, NULL);
     shift_rows(state);
-    assert_round_state(expected, state, round + 1, "s_row");
+    assert_round_state(expected, state, round, "s_row");
 
     // R[n].m_col (only mix columns on rounds 1-9)
-    if (round < NUM_ROUNDS - 1) {
+    if (round < NUM_ROUNDS) {
         sodium_hex2bin(
         expected,
         sizeof(expected),
@@ -64,18 +64,18 @@ static void test_single_round(
         strlen(round_state->m_col),
         NULL, NULL, NULL);
         mix_columns(state);
-        assert_round_state(expected, state, round + 1, "m_col");
+        assert_round_state(expected, state, round , "m_col");
     }
 
     // R[n].k_sch
-    memcpy(key_schedule, key_schedules[round + 1], 16);
+    memcpy(key_schedule, key_schedules[round], 16);
     sodium_hex2bin(
         expected,
         sizeof(expected),
         round_state->k_sch,
         strlen(round_state->k_sch),
         NULL, NULL, NULL);
-    assert_round_state(expected, key_schedule, round + 1, "k_sch");
+    assert_round_state(expected, key_schedule, round, "k_sch");
     add_round_key(key_schedule, state);
 }
 
@@ -119,7 +119,7 @@ static void test_encrypt(void) {
 static void test_rounds() {
     uint8_t expected[16] = {0};
     uint8_t key[16] = {0};
-    uint8_t round_keys[11][16]; // 16 bytes * 11 (0-10)
+    uint8_t key_schedules[11][16]; // 16 bytes * 11 (0-10)
     uint8_t state[16] = {0};
 
     sodium_hex2bin(
@@ -139,10 +139,10 @@ static void test_rounds() {
     );
 
     // get the round keys
-    key_expansion(key, round_keys);
+    key_expansion(key, key_schedules);
 
     // initialize for R[00] - before the rounds
-    add_round_key(round_keys[0], state);
+    add_round_key(key_schedules[0], state);
     sodium_hex2bin(
         expected,
         16,
@@ -154,8 +154,8 @@ static void test_rounds() {
     TEST_ASSERT_EQUAL_UINT8_ARRAY(expected, state, 16);
 
     // iterate each round updating the state
-    for (int i = 0; i < NUM_ROUNDS; i++) {
-        test_single_round(i, round_keys, state);
+    for (int round = 1; round < NUM_ROUNDS + 1; round++) {
+        test_single_round(round, key_schedules, state);
     }
 
     // verify

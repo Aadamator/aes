@@ -26,13 +26,13 @@ int decrypt(const uint8_t key[16], const uint8_t ciphertext[16], uint8_t plainte
     // create key schedules
     key_expansion(key, key_schedules);
 
-    // first round special: without inverse_mix_columns
+    // first round is special: without inverse_mix_columns
     add_round_key(key_schedules[10], state);
     inverse_sub_bytes(state);
     inverse_shift_rows(state);
 
-    // rounds 10-2 are ordinary rounds
-    for (int round = 9; round > 0; round--) {
+    // rounds 2-10 are ordinary rounds
+    for (int round = 9; round > 0; --round) {
         add_round_key(key_schedules[round], state);
         inverse_mix_columns(state);
         inverse_sub_bytes(state);

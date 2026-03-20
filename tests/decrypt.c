@@ -2,11 +2,9 @@
 
 #include "aes_128.h"
 #include "unity.h"
+#include "s_box.h"
 #include "sodium.h"
-#include "utilities/assertations.h"
 #include "utilities/constants.h"
-#include "utilities/macros.h"
-#include "utilities/types.h"
 
 /**
  * Test the full end-to-end functionality of AES-128 implementation using known ciphertext ->
