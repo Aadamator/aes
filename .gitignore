@@ -229,3 +229,6 @@ CTestTestfile.cmake
 _deps
 CMakeUserPresets.json
 build/
+
+### Project-specific
+.benchmarks/
