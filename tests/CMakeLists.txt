@@ -1,5 +1,6 @@
 function(add_aes_test test_name aes_library test_source)
-    add_executable(${test_name} ${test_source} test_utils.c)
+    file(GLOB TEST_UTILITY_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/utilities/*.c")
+    add_executable(${test_name} ${test_source} ${TEST_UTILITY_SOURCES})
     target_link_libraries(${test_name} PRIVATE aes_128_interface ${aes_library} sodium unity)
     add_test(NAME ${test_name} COMMAND ${test_name})
 endfunction()
