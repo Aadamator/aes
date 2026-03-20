@@ -106,11 +106,13 @@ table.
 ### 2.1. Requirements
 
 * [CMake >=3.21](https://cmake.org/download/)
-* A C compiler with C11 support:
+* A C compiler with at least C11 support **and** a C++ compiler with at least C++11 support:
   - Linux: [**GCC**](https://gcc.gnu.org/install/) or [**Clang**](https://releases.llvm.org/download.html)
   - macOS: **Apple Clang** (via [Xcode Command Line Tools](https://developer.apple.com/documentation/xcode/installing-the-command-line-tools))
   - Windows: **MSVC** (via [Visual Studio Build Tools](https://code.visualstudio.com/docs/cpp/config-msvc)) or **Clang/MinGW**
 * [GNU Make (Optional)](https://www.gnu.org/software/make/)
+
+> ⚠️ **NOTE:** While the core AES-128 algorithms are written entirely in C11, the benchmarking framework relies on Google Benchmark, which requires C++11 to compile.
 
 <sup>[Back to top ^][table-of-contents]</sup>
 
