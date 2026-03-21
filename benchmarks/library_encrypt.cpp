@@ -31,4 +31,4 @@ static void BMLibraryEncrypt(benchmark::State& state) {
   mbedtls_aes_free(&aes);
 }
 
-BENCHMARK(BMLibraryEncrypt)->Name("Third-party Library");
+BENCHMARK(BMLibraryEncrypt)->Name(AES_LIBRARY_NAME);
