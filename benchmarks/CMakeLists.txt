@@ -19,9 +19,8 @@ function(add_aes_benchmark benchmark_name aes_implementation name benchmark_sour
         benchmark::benchmark_main
     )
 
-    # pass the library name to C++ so the JSON output knows which implementation this is
-    target_compile_definitions(
-        ${benchmark_name}
+    # pass the implementation name to C++
+    target_compile_definitions(${benchmark_name}
         PRIVATE
         AES_IMPLEMENTATION_NAME="${name}"
     )
@@ -41,24 +40,30 @@ function(add_library_benchmark direction)
         benchmark::benchmark_main
         mbedcrypto                  # Mbed-TLS thord-party library
     )
+
+    # pass the library name to C++
+    target_compile_definitions(library_${direction}_benchmark
+        PRIVATE
+        "AES_LIBRARY_NAME=\"Library (Mbed-TLS)\""
+    )
 endfunction()
 
 # aes_ni benchmarks
 add_aes_benchmark(aes_ni_encrypt_benchmark aes_128_ni "AES-NI" encrypt.cpp)
-#add_aes_benchmark(aes_ni_decrypt_benchmark aes_128_ni "AES-NI" decrypt.cpp)
+add_aes_benchmark(aes_ni_decrypt_benchmark aes_128_ni "AES-NI" decrypt.cpp)
 
 # naive benchmarks
 add_aes_benchmark(naive_encrypt_benchmark aes_128_naive "Naive" encrypt.cpp)
-#add_aes_benchmark(naive_decrypt_benchmark aes_128_naive "Naive" decrypt.cpp)
+add_aes_benchmark(naive_decrypt_benchmark aes_128_naive "Naive" decrypt.cpp)
 
 # optimized benchmarks
 add_aes_benchmark(optimized_encrypt_benchmark aes_128_optimized "Optimized" encrypt.cpp)
-#add_aes_benchmark(optimized_decrypt_benchmark aes_128_optimized "Optimized" decrypt.cpp)
+add_aes_benchmark(optimized_decrypt_benchmark aes_128_optimized "Optimized" decrypt.cpp)
 
 # t_tables benchmarks
 add_aes_benchmark(t_tables_encrypt_benchmark aes_128_t_tables "T-tables" encrypt.cpp)
-#add_aes_benchmark(t_tables_decrypt_benchmark aes_128_t_tables "T-tables" decrypt.cpp)
+add_aes_benchmark(t_tables_decrypt_benchmark aes_128_t_tables "T-tables" decrypt.cpp)
 
 # third party library benchmarks
 add_library_benchmark(encrypt)
-#add_openssl_benchmark(decrypt)
+add_library_benchmark(decrypt)
