@@ -24,6 +24,9 @@
     - [3.1.1. Using CTest](#311-using-ctest)
     - [3.1.2. Using GNU Make (Recommended)](#312-using-gnu-make-recommended)
   - [3.2. Benchmarking](#32-benchmarking)
+    - [3.2.1. Running the benchmarks](#321-running-the-benchmarks)
+    - [3.2.2. Using GNU Make (Recommended)](#322-using-gnu-make-recommended)
+    - [3.2.3. Reporting](#323-reporting)
 * [4. Appendix](#-4-appendix)
   - [4.1. Projects](#41-implementations)
   - [4.2. Useful commands](#42-useful-commands)
@@ -43,7 +46,20 @@ This repo uses a pseudo-monorepo structure:
 
 ```text
 .
+├─ benchmarks/
+│   ├── utilities/              <-- Utility functions and constants to aid in the benchmarking.
+│   │   └── ...
+│   ├── CMakeLists.txt          <-- Defines test executables and links libraries.
+│   ├── decrypt.cpp             <-- Benchmarks an AES-128 decryption implementation.
+│   ├── encrypt.cpp             <-- Benchmarks an AES-128 encryption implementation.
+│   ├── library_decrypt.cpp     <-- Benchmarks a third-party library AES-128 decryption implementation.
+│   ├── library_encrypt.cpp     <-- Benchmarks a third-party library AES-128 encryption implementation.
+│   ├── reporter.py             <-- Script used to aggregate the benchmarks into a JSON report.
+│   └── ...
 ├─ docs/
+│   ├── report/                 <-- LaTeX source files for the report.
+│   │   ├── main.tex
+│   │   └── ...
 │   └── ...
 ├─ impls/
 │   ├── <aes_implementation>/
@@ -57,14 +73,29 @@ This repo uses a pseudo-monorepo structure:
 │   │   ├── CMakeLists.txt      <-- Header declarations.
 │   │   └── ...
 │   └── ...
+├─ lib/
+│   ├── constants.h
+│   ├── constants.c             <-- Common constants used across each implementation.
+│   ├── gf.h
+│   ├── gf.c                    <-- Utility functions related to Galois field arithmetic.
+│   ├── s_box.h
+│   ├── s_box.c                 <-- Utility functions and constants related to the S-box look-up
+table.
+│   ├── state_utils.h
+│   ├── state_utils.c           <-- Utility functions used in state manipulation, e.g. mapping matrices.
+│   ├── CMakeLists.txt          <-- Header declarations and public linking.
+│   └── ...
 ├─ tests/
-│   ├── unit_tests.c            <-- Unit tests to test AES-128 implementation(s).
+│   ├── utilities/              <-- Utility functions and constants to aid in the tests.
+│   │   └── ...
+│   ├── decrypt.c               <-- Unit tests to test AES-128 decryption implementation(s).
+│   ├── encrypt.c               <-- Unit tests to test AES-128 encryption implementation(s).
 │   ├── CMakeLists.txt          <-- Defines test executables and registers them with CTest.
 │   └── ...
 ├── .editorconfig               <-- Editor configuration file.
 ├── CMakeLists.txt              <-- Root-level build entrypoint: defines the project, fetches dependencies, and wires up subdirectories.
 ├── LICENSE
-├── Makefile                    <-- root-level scripts
+├── Makefile                    <-- Root-level scripts
 ├── README.md
 └── ...
 ```
@@ -76,11 +107,14 @@ This repo uses a pseudo-monorepo structure:
 ### 2.1. Requirements
 
 * [CMake >=3.21](https://cmake.org/download/)
-* A C compiler with C11 support:
+* A C compiler with at least C11 support **and** a C++ compiler with at least C++11 support:
   - Linux: [**GCC**](https://gcc.gnu.org/install/) or [**Clang**](https://releases.llvm.org/download.html)
   - macOS: **Apple Clang** (via [Xcode Command Line Tools](https://developer.apple.com/documentation/xcode/installing-the-command-line-tools))
   - Windows: **MSVC** (via [Visual Studio Build Tools](https://code.visualstudio.com/docs/cpp/config-msvc)) or **Clang/MinGW**
 * [GNU Make (Optional)](https://www.gnu.org/software/make/)
+* [Python v3.10.12+](https://www.python.org/downloads/) (optional - used to generate the report)
+
+> ⚠️ **NOTE:** While the core AES-128 algorithms are written entirely in C11, the benchmarking framework relies on Google Benchmark, which requires C++11 to compile.
 
 <sup>[Back to top ^][table-of-contents]</sup>
 
@@ -90,10 +124,10 @@ This repo uses a pseudo-monorepo structure:
 
 1. Configure the build and fetch dependencies:
 ```bash
-$ cmake -S . -B build
+$ cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
 ```
 
-2. Build the source files:
+2. Build the source files into executables:
 ```bash
 $ cmake --build build
 ```
@@ -113,7 +147,7 @@ $ make
 
 ### 3.1. Unit Tests
 
-Unit tests are located in the [`tests/`](./tests/) directory and are implemented using [Unity](https://github.com/ThrowTheSwitch/Unity).
+Unit tests are located in the [`tests/`](./tests/) directory and are implemented using CTest as the test runner and [Unity](https://github.com/ThrowTheSwitch/Unity) as an assertation library.
 
 <sup>[Back to top ^][table-of-contents]</sup>
 
@@ -139,7 +173,51 @@ $ make test
 
 ### 3.2. Benchmarking
 
-TBC...
+Benchmarking utilizes Google's [Microbenchmarks](https://github.com/google/benchmark) as a benchmark task runner (written in C++) to run benchmarks for each C implementation and a third-party implementation from the [mbed TLS](https://github.com/ARMmbed/mbedtls) project.
+
+The third-party implementation is used to compare the performance of the AES implementations and exposes efficient single block AES-128 encryption/decryption functions (see their [documentation](https://mbed-tls.readthedocs.io/projects/api/en/v3.6.0/api/file/aes_8h/#_CPPv421mbedtls_aes_crypt_ecbP19mbedtls_aes_contextiAL16E_KhAL16E_h) for more details)
+
+#### 3.2.1. Running the benchmarks
+
+1. Ensure that the build directory is configured and built as described in [2.2.1. Using CMake](#221-using-cmake).
+
+2. Each benchmark is run separately from their corresponding built executable, replacing `<aes_ni|naive|optimized|t_tables>` with the name of the implementation to benchmark and `<decrypt|encrypt>` with the type of benchmark to run:
+```shell
+./build/benchmarks/<aes_ni|naive|optimized|t_tables>_<decrypt|encrypt>_benchmark \
+		--benchmark_display_aggregates_only=true \
+		--benchmark_out=./.benchmarks/<aes_ni|naive|optimized|t_tables>_<decrypt|encrypt>.json \
+		--benchmark_out_format=json \
+		--benchmark_repetitions=10
+```
+
+> ⚠️ **NOTE:** You must create the `.benchmarks/` directory before running the benchmark.
+
+<sup>[Back to top ^][table-of-contents]</sup>
+
+#### 3.2.2. Using GNU Make (Recommended)
+
+1. Ensure that the build directory is configured and built as described in [2.2.2. Using GNU Make](#222-using-gnu-make-recommended).
+
+2. For convenience, benchmarks can be run, replacing `<decrypt|encrypt>` with the type of benchmark to run:
+```bash
+$ make -j benchmark
+```
+
+> ⚠️ **NOTE:** As each benchmark for each implementation is run in a separate process, the `-j` flag instructs `make` to run multiple benchmarks in parallel if the system supports multiple CPU cores.
+
+<sup>[Back to top ^][table-of-contents]</sup>
+
+#### 3.2.3. Reporting
+
+When the benchmarking is run, a JSON report is generated for each implementation and each algorthim (i.e. encryption and decryption) to the `.benchmarks/` directory. In order to aggregate these results into a single report, the [`reporter.py`](./benchmarks/reporter.py) script can be used.
+
+To run the script you must have Python v3.10.12+ installed and can be run simply by using:
+
+```shell
+$ python3 ./benchmarks/reporter.py
+```
+
+The script will generate the aggregated report to `.benchmarks/aggregated_benchmarks.json`.
 
 <sup>[Back to top ^][table-of-contents]</sup>
 
@@ -156,13 +234,22 @@ TBC...
 
 ### 4.2. Useful commands
 
-| Name                                                                      | Description                                                                                                              |
-|---------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------|
-| `cmake -S . -B build`/`make configure`                                    | Configures the `build/` directory and fetches dependencies.                                                              |
-| `cmake --build build`/`make build`                                        | Compiles the source files to the `build/` directory.                                                                     |
-| `ctest --test-dir build`/`make test`                                      | Runs unit tests for all implementations.                                                                                 |
-| `ctest --test-dir build -R <implementation>`/`make test_<implementation>` | Runs unit tests for a specific implementation, one of: <br/>* `naive`<br/>* `optimized`<br/>* `t_tables`<br/>* `aes_ni`. |
-| `make update`                                                             | Re-configures the build directory - useful for caching previously downloaded dependencies.                               |
+| Name                                                                      | Description                                                                                                                                  |
+|---------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------|
+| `cmake -S . -B build`/`make configure`                                    | Configures the `build/` directory and fetches dependencies.                                                                                  |
+| `cmake --build build`/`make build`                                        | Compiles the source files to the `build/` directory.                                                                                         |
+| `ctest --test-dir build`/`make test`                                      | Runs unit tests for all implementations.                                                                                                     |
+| `ctest --test-dir build -R <implementation>`/`make test_<implementation>` | Runs unit tests for a specific implementation, one of: <br/>* `naive`<br/>* `optimized`<br/>* `t_tables`<br/>* `aes_ni`.                     |
+| `make -j benchmark`                                                       | Runs all benchmarks across all implementations and the third-party library AES-128 block implementation.                                     |
+| `make -j benchmark_decrypt`                                               | Runs benchmarks across all decryption implementations and the third-party library AES-128 block implementation.                              |
+| `make -j benchmark_encrypt`                                               | Runs benchmarks across all encryption implementations and the third-party library AES-128 block implementation.                              |
+| `make benchmark_report`                                                   | Aggregates all the benchmark reports into a single JSON report to `.benchmarks/aggregated_benchmarks.json` and pretty prints to the console. |
+| `make test`                                                               | Runs all tests across all implementations.                                                                                                   |
+| `make test_aes_ni`                                                        | Runs tests specific to the AES-NI implementation.                                                                                            |
+| `make test_naive`                                                         | Runs tests specific to the naive AES implementation.                                                                                         |
+| `make test_optimized`                                                     | Runs tests specific to the optimized AES implementation.                                                                                     |
+| `make test_t_tables`                                                      | Runs tests specific to the AES implementation using T-tables.                                                                                |
+| `make update`                                                             | Re-configures the build directory - useful for caching previously downloaded dependencies.                                                   |
 
 <sup>[Back to top ^][table-of-contents]</sup>
 
