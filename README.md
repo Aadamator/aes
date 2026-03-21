@@ -24,9 +24,9 @@
     - [3.1.1. Using CTest](#311-using-ctest)
     - [3.1.2. Using GNU Make (Recommended)](#312-using-gnu-make-recommended)
   - [3.2. Benchmarking](#32-benchmarking)
-    - [3.2.1. Running the benchmark](#321-running-the-benchmark)
+    - [3.2.1. Running the benchmarks](#321-running-the-benchmarks)
     - [3.2.2. Using GNU Make (Recommended)](#322-using-gnu-make-recommended)
-    - [3.2.3. Benchmark Report](#323-benchmark-report)
+    - [3.2.3. Reporting](#323-reporting)
 * [4. Appendix](#-4-appendix)
   - [4.1. Projects](#41-implementations)
   - [4.2. Useful commands](#42-useful-commands)
@@ -54,6 +54,7 @@ This repo uses a pseudo-monorepo structure:
 │   ├── encrypt.cpp             <-- Benchmarks an AES-128 encryption implementation.
 │   ├── library_decrypt.cpp     <-- Benchmarks a third-party library AES-128 decryption implementation.
 │   ├── library_encrypt.cpp     <-- Benchmarks a third-party library AES-128 encryption implementation.
+│   ├── reporter.py             <-- Script used to aggregate the benchmarks into a JSON report.
 │   └── ...
 ├─ docs/
 │   ├── report/                 <-- LaTeX source files for the report.
@@ -111,6 +112,7 @@ table.
   - macOS: **Apple Clang** (via [Xcode Command Line Tools](https://developer.apple.com/documentation/xcode/installing-the-command-line-tools))
   - Windows: **MSVC** (via [Visual Studio Build Tools](https://code.visualstudio.com/docs/cpp/config-msvc)) or **Clang/MinGW**
 * [GNU Make (Optional)](https://www.gnu.org/software/make/)
+* [Python v3.10.12+](https://www.python.org/downloads/) (optional - used to generate the report)
 
 > ⚠️ **NOTE:** While the core AES-128 algorithms are written entirely in C11, the benchmarking framework relies on Google Benchmark, which requires C++11 to compile.
 
@@ -175,7 +177,7 @@ Benchmarking utilizes Google's [Microbenchmarks](https://github.com/google/bench
 
 The third-party implementation is used to compare the performance of the AES implementations and exposes efficient single block AES-128 encryption/decryption functions (see their [documentation](https://mbed-tls.readthedocs.io/projects/api/en/v3.6.0/api/file/aes_8h/#_CPPv421mbedtls_aes_crypt_ecbP19mbedtls_aes_contextiAL16E_KhAL16E_h) for more details)
 
-#### 3.2.1. Running the benchmark
+#### 3.2.1. Running the benchmarks
 
 1. Ensure that the build directory is configured and built as described in [2.2.1. Using CMake](#221-using-cmake).
 
@@ -196,16 +198,26 @@ The third-party implementation is used to compare the performance of the AES imp
 
 1. Ensure that the build directory is configured and built as described in [2.2.2. Using GNU Make](#222-using-gnu-make-recommended).
 
-2. For convenience, benchmarks can be run sequentially, replacing `<decrypt|encrypt>` with the type of benchmark to run:
+2. For convenience, benchmarks can be run, replacing `<decrypt|encrypt>` with the type of benchmark to run:
 ```bash
-$ make benchmark_<decrypt|encrypt>
+$ make -j benchmark
 ```
+
+> ⚠️ **NOTE:** As each benchmark for each implementation is run in a separate process, the `-j` flag instructs `make` to run multiple benchmarks in parallel if the system supports multiple CPU cores.
 
 <sup>[Back to top ^][table-of-contents]</sup>
 
-#### 3.2.3. Benchmark Report
+#### 3.2.3. Reporting
 
-TBC...
+When the benchmarking is run, a JSON report is generated for each implementation and each algorthim (i.e. encryption and decryption) to the `.benchmarks/` directory. In order to aggregate these results into a single report, the [`reporter.py`](./benchmarks/reporter.py) script can be used.
+
+To run the script you must have Python v3.10.12+ installed and can be run simply by using:
+
+```shell
+$ python3 ./benchmarks/reporter.py
+```
+
+The script will generate the aggregated report to `.benchmarks/aggregated_benchmarks.json`.
 
 <sup>[Back to top ^][table-of-contents]</sup>
 
@@ -228,8 +240,9 @@ TBC...
 | `cmake --build build`/`make build`                                        | Compiles the source files to the `build/` directory.                                                                     |
 | `ctest --test-dir build`/`make test`                                      | Runs unit tests for all implementations.                                                                                 |
 | `ctest --test-dir build -R <implementation>`/`make test_<implementation>` | Runs unit tests for a specific implementation, one of: <br/>* `naive`<br/>* `optimized`<br/>* `t_tables`<br/>* `aes_ni`. |
-| `make benchmark_decrypt`                                                  | Runs benchmarks across all decryption implementations and the third-party library AES-128 block implementation.          |
-| `make benchmark_encrypt`                                                  | Runs benchmarks across all encryption implementations and the third-party library AES-128 block implementation.          |
+| `make -j benchmark`                                                       | Runs all benchmarks across all implementations and the third-party library AES-128 block implementation.                 |
+| `make -j benchmark_decrypt`                                               | Runs benchmarks across all decryption implementations and the third-party library AES-128 block implementation.          |
+| `make -j benchmark_encrypt`                                               | Runs benchmarks across all encryption implementations and the third-party library AES-128 block implementation.          |
 | `make test`                                                               | Runs all tests across all implementations.                                                                               |
 | `make test_aes_ni`                                                        | Runs tests specific to the AES-NI implementation.                                                                        |
 | `make test_naive`                                                         | Runs tests specific to the naive AES implementation.                                                                     |

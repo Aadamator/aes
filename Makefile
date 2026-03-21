@@ -1,24 +1,63 @@
 BUILD_DIR ?= build
 CMAKE ?= cmake
 CTEST ?= ctest
+BENCHMARK_TARGETS := \
+    benchmark_aes_ni_decrypt \
+    benchmark_aes_ni_encrypt \
+    benchmark_library_decrypt \
+    benchmark_library_encrypt \
+    benchmark_naive_decrypt \
+    benchmark_naive_encrypt \
+    benchmark_optimized_decrypt \
+    benchmark_optimized_encrypt \
+    benchmark_t_tables_decrypt \
+    benchmark_t_tables_encrypt
 
-.PHONY: benchmark build clean configure test test_aes_ni test_naive test_optimized test_t_tables update
+.PHONY: benchmark \
+	benchmark_decrypt \
+	benchmark_encrypt \
+    build \
+    clean \
+    configure \
+    test \
+    test_aes_ni \
+    test_naive \
+    test_optimized \
+    test_t_tables \
+    update
 
 all: configure build
 
-benchmark_encrypt:
-	@echo ">>> Running benchmarks"
+###
+# benchmarking
+###
+
+benchmark: benchmark_decrypt \
+	benchmark_encrypt
+
+benchmark_decrypt: benchmark_aes_ni_decrypt \
+	benchmark_library_decrypt \
+	benchmark_naive_decrypt \
+	benchmark_optimized_decrypt \
+	benchmark_t_tables_decrypt
+
+benchmark_encrypt: benchmark_aes_ni_encrypt \
+	benchmark_library_encrypt \
+	benchmark_naive_encrypt \
+	benchmark_optimized_encrypt \
+	benchmark_t_tables_encrypt
+
+$(BENCHMARK_TARGETS): benchmark_%:
 	@cmake -E make_directory .benchmarks
-	./$(BUILD_DIR)/benchmarks/naive_encrypt_benchmark \
-		--benchmark_display_aggregates_only=true \
-		--benchmark_out=./.benchmarks/naive_encrypt.json \
-		--benchmark_out_format=json \
-		--benchmark_repetitions=10
-	./$(BUILD_DIR)/benchmarks/library_encrypt_benchmark \
-		--benchmark_display_aggregates_only=true \
-		--benchmark_out=./.benchmarks/library_encrypt.json \
-		--benchmark_out_format=json \
-		--benchmark_repetitions=10
+	./$(BUILD_DIR)/benchmarks/$*_benchmark \
+       --benchmark_display_aggregates_only=true \
+       --benchmark_out=./.benchmarks/$*_benchmark.json \
+       --benchmark_out_format=json \
+       --benchmark_repetitions=30
+
+###
+# building
+###
 
 build:
 	@echo ">>> Building $(BUILD_DIR)/ directory"
@@ -31,6 +70,14 @@ clean:
 configure: clean
 	@echo ">>> Configuring $(BUILD_DIR)/ directory"
 	$(CMAKE) -S . -B $(BUILD_DIR) -DCMAKE_BUILD_TYPE=Release
+
+update:
+	@echo ">>> Re-configuring $(BUILD_DIR)/ directory"
+	$(CMAKE) -S . -B $(BUILD_DIR) -DCMAKE_BUILD_TYPE=Release
+
+###
+# testing
+###
 
 test:
 	@echo ">>> Running all unit tests"
@@ -51,7 +98,3 @@ test_optimized:
 test_t_tables:
 	@echo ">>> Running T-tables implementation unit tests"
 	$(CTEST) --test-dir $(BUILD_DIR) -R "t_tables_(decrypt|encrypt)_tests" --output-on-failure
-
-update:
-	@echo ">>> Re-configuring $(BUILD_DIR)/ directory"
-	$(CMAKE) -S . -B $(BUILD_DIR) -DCMAKE_BUILD_TYPE=Release
