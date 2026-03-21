@@ -234,21 +234,22 @@ The script will generate the aggregated report to `.benchmarks/aggregated_benchm
 
 ### 4.2. Useful commands
 
-| Name                                                                      | Description                                                                                                              |
-|---------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------|
-| `cmake -S . -B build`/`make configure`                                    | Configures the `build/` directory and fetches dependencies.                                                              |
-| `cmake --build build`/`make build`                                        | Compiles the source files to the `build/` directory.                                                                     |
-| `ctest --test-dir build`/`make test`                                      | Runs unit tests for all implementations.                                                                                 |
-| `ctest --test-dir build -R <implementation>`/`make test_<implementation>` | Runs unit tests for a specific implementation, one of: <br/>* `naive`<br/>* `optimized`<br/>* `t_tables`<br/>* `aes_ni`. |
-| `make -j benchmark`                                                       | Runs all benchmarks across all implementations and the third-party library AES-128 block implementation.                 |
-| `make -j benchmark_decrypt`                                               | Runs benchmarks across all decryption implementations and the third-party library AES-128 block implementation.          |
-| `make -j benchmark_encrypt`                                               | Runs benchmarks across all encryption implementations and the third-party library AES-128 block implementation.          |
-| `make test`                                                               | Runs all tests across all implementations.                                                                               |
-| `make test_aes_ni`                                                        | Runs tests specific to the AES-NI implementation.                                                                        |
-| `make test_naive`                                                         | Runs tests specific to the naive AES implementation.                                                                     |
-| `make test_optimized`                                                     | Runs tests specific to the optimized AES implementation.                                                                 |
-| `make test_t_tables`                                                      | Runs tests specific to the AES implementation using T-tables.                                                            |
-| `make update`                                                             | Re-configures the build directory - useful for caching previously downloaded dependencies.                               |
+| Name                                                                      | Description                                                                                                                                  |
+|---------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------|
+| `cmake -S . -B build`/`make configure`                                    | Configures the `build/` directory and fetches dependencies.                                                                                  |
+| `cmake --build build`/`make build`                                        | Compiles the source files to the `build/` directory.                                                                                         |
+| `ctest --test-dir build`/`make test`                                      | Runs unit tests for all implementations.                                                                                                     |
+| `ctest --test-dir build -R <implementation>`/`make test_<implementation>` | Runs unit tests for a specific implementation, one of: <br/>* `naive`<br/>* `optimized`<br/>* `t_tables`<br/>* `aes_ni`.                     |
+| `make -j benchmark`                                                       | Runs all benchmarks across all implementations and the third-party library AES-128 block implementation.                                     |
+| `make -j benchmark_decrypt`                                               | Runs benchmarks across all decryption implementations and the third-party library AES-128 block implementation.                              |
+| `make -j benchmark_encrypt`                                               | Runs benchmarks across all encryption implementations and the third-party library AES-128 block implementation.                              |
+| `make benchmark_report`                                                   | Aggregates all the benchmark reports into a single JSON report to `.benchmarks/aggregated_benchmarks.json` and pretty prints to the console. |
+| `make test`                                                               | Runs all tests across all implementations.                                                                                                   |
+| `make test_aes_ni`                                                        | Runs tests specific to the AES-NI implementation.                                                                                            |
+| `make test_naive`                                                         | Runs tests specific to the naive AES implementation.                                                                                         |
+| `make test_optimized`                                                     | Runs tests specific to the optimized AES implementation.                                                                                     |
+| `make test_t_tables`                                                      | Runs tests specific to the AES implementation using T-tables.                                                                                |
+| `make update`                                                             | Re-configures the build directory - useful for caching previously downloaded dependencies.                                                   |
 
 <sup>[Back to top ^][table-of-contents]</sup>
 

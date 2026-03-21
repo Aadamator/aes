@@ -44,20 +44,20 @@ function(add_library_benchmark direction)
 endfunction()
 
 # aes_ni benchmarks
-add_aes_benchmark(aes_ni_encrypt_benchmark aes_128_ni "AES-NI Encryption" encrypt.cpp)
-#add_aes_benchmark(aes_ni_decrypt_benchmark aes_128_ni "AES-NI Decryption" decrypt.cpp)
+add_aes_benchmark(aes_ni_encrypt_benchmark aes_128_ni "AES-NI" encrypt.cpp)
+#add_aes_benchmark(aes_ni_decrypt_benchmark aes_128_ni "AES-NI" decrypt.cpp)
 
 # naive benchmarks
-add_aes_benchmark(naive_encrypt_benchmark aes_128_naive "Naive Encryption" encrypt.cpp)
-#add_aes_benchmark(naive_decrypt_benchmark aes_128_naive "Naive Decryption" decrypt.cpp)
+add_aes_benchmark(naive_encrypt_benchmark aes_128_naive "Naive" encrypt.cpp)
+#add_aes_benchmark(naive_decrypt_benchmark aes_128_naive "Naive" decrypt.cpp)
 
 # optimized benchmarks
-add_aes_benchmark(optimized_encrypt_benchmark aes_128_optimized "Optimized Encryption" encrypt.cpp)
-#add_aes_benchmark(optimized_decrypt_benchmark aes_128_optimized "Optimized Decryption" decrypt.cpp)
+add_aes_benchmark(optimized_encrypt_benchmark aes_128_optimized "Optimized" encrypt.cpp)
+#add_aes_benchmark(optimized_decrypt_benchmark aes_128_optimized "Optimized" decrypt.cpp)
 
 # t_tables benchmarks
-add_aes_benchmark(t_tables_encrypt_benchmark aes_128_t_tables "T-tables Encryption" encrypt.cpp)
-#add_aes_benchmark(t_tables_decrypt_benchmark aes_128_t_tables "T-tables Decryption" decrypt.cpp)
+add_aes_benchmark(t_tables_encrypt_benchmark aes_128_t_tables "T-tables" encrypt.cpp)
+#add_aes_benchmark(t_tables_decrypt_benchmark aes_128_t_tables "T-tables" decrypt.cpp)
 
 # third party library benchmarks
 add_library_benchmark(encrypt)
