@@ -16,6 +16,7 @@ BENCHMARK_TARGETS := \
 .PHONY: benchmark \
 	benchmark_decrypt \
 	benchmark_encrypt \
+	benchmark_report \
     build \
     clean \
     configure \
@@ -48,12 +49,17 @@ benchmark_encrypt: benchmark_aes_ni_encrypt \
 	benchmark_t_tables_encrypt
 
 $(BENCHMARK_TARGETS): benchmark_%:
+	@echo ">>> Running $* benchmark"
 	@cmake -E make_directory .benchmarks
-	./$(BUILD_DIR)/benchmarks/$*_benchmark \
+	@./$(BUILD_DIR)/benchmarks/$*_benchmark \
        --benchmark_display_aggregates_only=true \
        --benchmark_out=./.benchmarks/$*_benchmark.json \
        --benchmark_out_format=json \
-       --benchmark_repetitions=30
+       --benchmark_repetitions=30 > /dev/null 2>&1
+	@echo ">>> Finished $* benchmark"
+
+benchmark_report:
+	python3 benchmarks/reporter.py
 
 ###
 # building
