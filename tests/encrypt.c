@@ -1,9 +1,11 @@
 #include <string.h>
 
-#include "aes_128.h"
-#include "unity.h"
-#include "s_box.h"
 #include "sodium.h"
+#include "unity.h"
+
+#include "aes_128.h"
+#include "keys.h"
+#include "s_box.h"
 #include "utilities/assertations.h"
 #include "utilities/constants.h"
 #include "utilities/macros.h"
@@ -87,6 +89,7 @@ static void test_encrypt(void) {
     uint8_t expected_ciphertext[16] = {0};
     uint8_t ciphertext[16] = {0};
     uint8_t key[16] = {0};
+    uint8_t key_schedules[11][16] = {0}; // 16 bytes * 11 (0-10)
     uint8_t plaintext[16] = {0};
 
     sodium_hex2bin(
@@ -108,7 +111,10 @@ static void test_encrypt(void) {
         strlen(plaintext_as_hex),
         NULL, NULL, NULL);
 
-    encrypt(key, plaintext, ciphertext);
+    // pre-compute the round keys
+    key_expansion(key, key_schedules);
+
+    encrypt(key_schedules, plaintext, ciphertext);
 
     TEST_ASSERT_EQUAL_UINT8_ARRAY(expected_ciphertext, ciphertext, 16);
 }
@@ -136,9 +142,9 @@ static void test_rounds() {
         plaintext_as_hex,
         strlen(plaintext_as_hex),
         NULL, NULL, NULL
-    );
+        );
 
-    // get the round keys
+    // pre-compute the round keys
     key_expansion(key, key_schedules);
 
     // initialize for R[00] - before the rounds
