@@ -80,43 +80,9 @@ static void test_single_round(
 }
 
 /**
- * Test the full end-to-end functionality of AES-128 implementation using known plaintext ->
- * ciphertext
- */
-static void test_encrypt(void) {
-    uint8_t expected_ciphertext[16] = {0};
-    uint8_t ciphertext[16] = {0};
-    uint8_t key[16] = {0};
-    uint8_t plaintext[16] = {0};
-
-    sodium_hex2bin(
-        expected_ciphertext,
-        sizeof(expected_ciphertext),
-        ciphertext_as_hex,
-        strlen(ciphertext_as_hex),
-        NULL, NULL, NULL);
-    sodium_hex2bin(
-        key,
-        sizeof(key),
-        key_as_hex,
-        strlen(key_as_hex),
-        NULL, NULL, NULL);
-    sodium_hex2bin(
-        plaintext,
-        sizeof(plaintext),
-        plaintext_as_hex,
-        strlen(plaintext_as_hex),
-        NULL, NULL, NULL);
-
-    encrypt(key, plaintext, ciphertext);
-
-    TEST_ASSERT_EQUAL_UINT8_ARRAY(expected_ciphertext, ciphertext, 16);
-}
-
-/**
  * Runs a test for each round and checks the state at each step of the encryption process.
  */
-static void test_rounds() {
+static void test_encrypt_rounds() {
     uint8_t expected[16] = {0};
     uint8_t key[16] = {0};
     uint8_t key_schedules[11][16]; // 16 bytes * 11 (0-10)
@@ -176,8 +142,7 @@ void tearDown(void) {}
 int main(void) {
     UNITY_BEGIN();
 
-    RUN_TEST(test_encrypt);
-    RUN_TEST(test_rounds);
+    RUN_TEST(test_encrypt_rounds);
 
     return UNITY_END();
 }

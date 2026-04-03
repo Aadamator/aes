@@ -2,31 +2,24 @@
 
 #include "aes_128.h"
 #include "unity.h"
-#include "s_box.h"
 #include "sodium.h"
 #include "utilities/constants.h"
 
 /**
- * Test the full end-to-end functionality of AES-128 implementation using known ciphertext ->
- * plaintext
+ * Test the full end-to-end functionality of AES-128 implementation using known plaintext ->
+ * ciphertext
  */
-static void test_decrypt(void) {
-    uint8_t expected_plaintext[16] = {0};
+static void test_encrypt(void) {
+    uint8_t expected_ciphertext[16] = {0};
     uint8_t ciphertext[16] = {0};
     uint8_t key[16] = {0};
     uint8_t plaintext[16] = {0};
 
     sodium_hex2bin(
-        ciphertext,
-        sizeof(ciphertext),
+        expected_ciphertext,
+        sizeof(expected_ciphertext),
         ciphertext_as_hex,
         strlen(ciphertext_as_hex),
-        NULL, NULL, NULL);
-    sodium_hex2bin(
-        expected_plaintext,
-        sizeof(expected_plaintext),
-        plaintext_as_hex,
-        strlen(plaintext_as_hex),
         NULL, NULL, NULL);
     sodium_hex2bin(
         key,
@@ -34,10 +27,16 @@ static void test_decrypt(void) {
         key_as_hex,
         strlen(key_as_hex),
         NULL, NULL, NULL);
+    sodium_hex2bin(
+        plaintext,
+        sizeof(plaintext),
+        plaintext_as_hex,
+        strlen(plaintext_as_hex),
+        NULL, NULL, NULL);
 
-    decrypt(key, ciphertext, plaintext);
+    encrypt(key, plaintext, ciphertext);
 
-    TEST_ASSERT_EQUAL_UINT8_ARRAY(expected_plaintext, plaintext, 16);
+    TEST_ASSERT_EQUAL_UINT8_ARRAY(expected_ciphertext, ciphertext, 16);
 }
 
 // unity lifecycle functions
@@ -47,7 +46,7 @@ void tearDown(void) {}
 int main(void) {
     UNITY_BEGIN();
 
-    RUN_TEST(test_decrypt);
+    RUN_TEST(test_encrypt);
 
     return UNITY_END();
 }

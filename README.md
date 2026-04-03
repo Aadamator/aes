@@ -181,11 +181,11 @@ The third-party implementation is used to compare the performance of the AES imp
 
 1. Ensure that the build directory is configured and built as described in [2.2.1. Using CMake](#221-using-cmake).
 
-2. Each benchmark is run separately from their corresponding built executable, replacing `<aes_ni|naive|optimized|t_tables>` with the name of the implementation to benchmark and `<decrypt|encrypt>` with the type of benchmark to run:
+2. Each benchmark is run separately from their corresponding built executable, replacing `<ni_instructions|naive|optimized|t_tables>` with the name of the implementation to benchmark and `<decrypt|encrypt>` with the type of benchmark to run:
 ```shell
-./build/benchmarks/<aes_ni|naive|optimized|t_tables>_<decrypt|encrypt>_benchmark \
+./build/benchmarks/<ni_instructions|naive|optimized|t_tables>_<decrypt|encrypt>_benchmark \
 		--benchmark_display_aggregates_only=true \
-		--benchmark_out=./.benchmarks/<aes_ni|naive|optimized|t_tables>_<decrypt|encrypt>.json \
+		--benchmark_out=./.benchmarks/<ni_instructions|naive|optimized|t_tables>_<decrypt|encrypt>.json \
 		--benchmark_out_format=json \
 		--benchmark_repetitions=10
 ```
@@ -225,12 +225,12 @@ The script will generate the aggregated report to `.benchmarks/aggregated_benchm
 
 ### 4.1. Implementations
 
-| Name                                       | Description                                          |
-|--------------------------------------------|------------------------------------------------------|
-| [`naive`](./impls/naive/aes_128.c)         | A naive implementation of AES-128.                   |
-| [`optimized`](./impls/optimized/aes_128.c) | An optimized version of the naive implementation.    |
-| [`t_tables`](./impls/t_tables/aes_128.c)   | The optimized implementation using T-tables.         |
-| [`aes_ni`](./impls/aes_ni/aes_128.c)       | The optimized implementation using utilizing AES-NI. |
+| Name                                                   | Description                                         |
+|--------------------------------------------------------|-----------------------------------------------------|
+| [`naive`](./impls/naive/aes_128.c)                     | A naive implementation of AES-128.                  |
+| [`optimized`](./impls/optimized/aes_128.c)             | An optimized version of the naive implementation.   |
+| [`t_tables`](./impls/t_tables/aes_128.c)               | The optimized implementation using T-tables.        |
+| [`ni_instructions`](./impls/ni_instructions/aes_128.c) | The optimized implementation using NI instructions. |
 
 ### 4.2. Useful commands
 
@@ -239,14 +239,14 @@ The script will generate the aggregated report to `.benchmarks/aggregated_benchm
 | `cmake -S . -B build`/`make configure`                                    | Configures the `build/` directory and fetches dependencies.                                                                                  |
 | `cmake --build build`/`make build`                                        | Compiles the source files to the `build/` directory.                                                                                         |
 | `ctest --test-dir build`/`make test`                                      | Runs unit tests for all implementations.                                                                                                     |
-| `ctest --test-dir build -R <implementation>`/`make test_<implementation>` | Runs unit tests for a specific implementation, one of: <br/>* `naive`<br/>* `optimized`<br/>* `t_tables`<br/>* `aes_ni`.                     |
+| `ctest --test-dir build -R <implementation>`/`make test_<implementation>` | Runs unit tests for a specific implementation, one of: <br/>* `naive`<br/>* `optimized`<br/>* `t_tables`<br/>* `ni_instructions`.            |
 | `make -j benchmark`                                                       | Runs all benchmarks across all implementations and the third-party library AES-128 block implementation.                                     |
 | `make -j benchmark_decrypt`                                               | Runs benchmarks across all decryption implementations and the third-party library AES-128 block implementation.                              |
 | `make -j benchmark_encrypt`                                               | Runs benchmarks across all encryption implementations and the third-party library AES-128 block implementation.                              |
 | `make benchmark_report`                                                   | Aggregates all the benchmark reports into a single JSON report to `.benchmarks/aggregated_benchmarks.json` and pretty prints to the console. |
 | `make test`                                                               | Runs all tests across all implementations.                                                                                                   |
-| `make test_aes_ni`                                                        | Runs tests specific to the AES-NI implementation.                                                                                            |
 | `make test_naive`                                                         | Runs tests specific to the naive AES implementation.                                                                                         |
+| `make test_ni_instructions`                                               | Runs tests specific to the AES with NI instructions implementation.                                                                          |
 | `make test_optimized`                                                     | Runs tests specific to the optimized AES implementation.                                                                                     |
 | `make test_t_tables`                                                      | Runs tests specific to the AES implementation using T-tables.                                                                                |
 | `make update`                                                             | Re-configures the build directory - useful for caching previously downloaded dependencies.                                                   |
