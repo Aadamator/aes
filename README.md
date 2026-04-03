@@ -88,8 +88,9 @@ table.
 ├─ tests/
 │   ├── utilities/              <-- Utility functions and constants to aid in the tests.
 │   │   └── ...
-│   ├── decrypt.c               <-- Unit tests to test AES-128 decryption implementation(s).
-│   ├── encrypt.c               <-- Unit tests to test AES-128 encryption implementation(s).
+│   ├── test_decrypt.c          <-- End-to-end tests for AES-128 decryption implementation(s).
+│   ├── test_encrypt.c          <-- End-to-end tests for AES-128 encryption implementation(s).
+│   ├── test_encrypt_rounds.c   <-- Unit tests for per round iteration.
 │   ├── CMakeLists.txt          <-- Defines test executables and registers them with CTest.
 │   └── ...
 ├── .editorconfig               <-- Editor configuration file.
