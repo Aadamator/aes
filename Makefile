@@ -2,12 +2,12 @@ BUILD_DIR ?= build
 CMAKE ?= cmake
 CTEST ?= ctest
 BENCHMARK_TARGETS := \
-    benchmark_aes_ni_decrypt \
-    benchmark_aes_ni_encrypt \
     benchmark_library_decrypt \
     benchmark_library_encrypt \
     benchmark_naive_decrypt \
     benchmark_naive_encrypt \
+    benchmark_ni_instructions_decrypt \
+    benchmark_ni_instructions_encrypt \
     benchmark_optimized_decrypt \
     benchmark_optimized_encrypt \
     benchmark_t_tables_decrypt \
@@ -21,8 +21,8 @@ BENCHMARK_TARGETS := \
     clean \
     configure \
     test \
-    test_aes_ni \
     test_naive \
+    test_ni_instructions \
     test_optimized \
     test_t_tables \
     update
@@ -36,15 +36,15 @@ all: configure build
 benchmark: benchmark_decrypt \
 	benchmark_encrypt
 
-benchmark_decrypt: benchmark_aes_ni_decrypt \
-	benchmark_library_decrypt \
+benchmark_decrypt: benchmark_library_decrypt \
 	benchmark_naive_decrypt \
+	benchmark_ni_instructions_decrypt \
 	benchmark_optimized_decrypt \
 	benchmark_t_tables_decrypt
 
-benchmark_encrypt: benchmark_aes_ni_encrypt \
-	benchmark_library_encrypt \
+benchmark_encrypt: benchmark_library_encrypt \
 	benchmark_naive_encrypt \
+	benchmark_ni_instructions_encrypt \
 	benchmark_optimized_encrypt \
 	benchmark_t_tables_encrypt
 
