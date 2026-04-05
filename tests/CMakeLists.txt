@@ -12,6 +12,7 @@ function(add_aes_test test_name aes_implementation_name test_source)
         PRIVATE
         aes_128_interface           # shared header
         ${aes_implementation_name}
+        aes_lib
         sodium
         unity
     )
