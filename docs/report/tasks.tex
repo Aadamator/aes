@@ -12,7 +12,7 @@ This makes the implementation closely follow the "textbook" structure and our un
 
 \subsection{Optimized Implementation of AES-128}
 
-\subsection{Implementation of AES-NI}
+\subsection{Implementation of AES using NI instructions}
 
 \subsection{Implementation of AES-128 using T-tables}
 
@@ -32,24 +32,24 @@ All tests ran on the same hardware with compiler optimizations disabled to isola
             \textbf{Median Latency} \\ [0.5ex]
         \hline\hline
             Naive &
-            42.1 ns/op &
-            42.1 ns/op \\
+            - ns/op &
+            - ns/op \\
         \hline
             Optimized &
-            42.1 ns/op &
-            42.1 ns/op \\
+            - ns/op &
+            - ns/op \\
         \hline
             AES-NI &
-            42.1 ns/op &
-            42.1 ns/op \\ 
+            - ns/op &
+            - ns/op \\ 
         \hline
             Using T-tables &
-            42.1 ns/op &
-            42.1 ns/op \\ 
+            - ns/op &
+            - ns/op \\ 
         \hline
             libsodium &
-            42.1 ns/op &
-            42.1 ns/op \\ 
+            - ns/op &
+            - ns/op \\ 
         \hline 
     \end{tabular}
 \end{center}
