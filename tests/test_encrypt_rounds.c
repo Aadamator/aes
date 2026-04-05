@@ -1,9 +1,11 @@
 #include <string.h>
 
-#include "aes_128.h"
-#include "unity.h"
-#include "s_box.h"
 #include "sodium.h"
+#include "unity.h"
+
+#include "aes_128.h"
+#include "keys.h"
+#include "s_box.h"
 #include "utilities/assertations.h"
 #include "utilities/constants.h"
 #include "utilities/macros.h"
@@ -102,9 +104,9 @@ static void test_encrypt_rounds() {
         plaintext_as_hex,
         strlen(plaintext_as_hex),
         NULL, NULL, NULL
-    );
+        );
 
-    // get the round keys
+    // pre-compute the round keys
     key_expansion(key, key_schedules);
 
     // initialize for R[00] - before the rounds

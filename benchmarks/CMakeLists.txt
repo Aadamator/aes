@@ -15,6 +15,7 @@ function(add_aes_benchmark benchmark_name aes_implementation name benchmark_sour
         PRIVATE
         aes_128_interface           # shared header
         ${aes_implementation}
+        aes_lib
         benchmark::benchmark
         benchmark::benchmark_main
     )
