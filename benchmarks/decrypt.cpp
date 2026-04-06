@@ -29,4 +29,4 @@ static void BMDecrypt(benchmark::State& state) {
   }
 }
 
-BENCHMARK(BMDecrypt)->Name(AES_IMPLEMENTATION_NAME);
+BENCHMARK(BMDecrypt)->Iterations(iterations)->Repetitions(repetitions)->Name(AES_IMPLEMENTATION_NAME);

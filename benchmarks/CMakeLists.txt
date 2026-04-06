@@ -7,7 +7,7 @@ file(GLOB
 )
 
 function(add_aes_benchmark benchmark_name aes_implementation name benchmark_source)
-    # create the C++ executable
+    # create the c++ executable
     add_executable(${benchmark_name} ${benchmark_source} ${BENCHMARK_UTILITY_SOURCES})
 
     # link the specific implementation and libraries
@@ -49,13 +49,15 @@ function(add_library_benchmark direction)
     )
 endfunction()
 
-# aes_ni benchmarks
-add_aes_benchmark(aes_ni_encrypt_benchmark aes_128_ni "AES-NI" encrypt.cpp)
-add_aes_benchmark(aes_ni_decrypt_benchmark aes_128_ni "AES-NI" decrypt.cpp)
-
 # naive benchmarks
 add_aes_benchmark(naive_encrypt_benchmark aes_128_naive "Naive" encrypt.cpp)
 add_aes_benchmark(naive_decrypt_benchmark aes_128_naive "Naive" decrypt.cpp)
+
+# ni_instructions benchmarks
+add_aes_benchmark(ni_instructions_encrypt_benchmark aes_128_ni_instructions "NI Instructions"
+        encrypt.cpp)
+add_aes_benchmark(ni_instructions_decrypt_benchmark aes_128_ni_instructions "NI Instructions"
+        decrypt.cpp)
 
 # optimized benchmarks
 add_aes_benchmark(optimized_encrypt_benchmark aes_128_optimized "Optimized" encrypt.cpp)

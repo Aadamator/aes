@@ -30,7 +30,7 @@ jobs:
       - name: "🏗️ Build"
         run: make build
       - name: "🧪 Test"
-        run: make test_aes_ni
+        run: make test_ni_instructions
 
   test_naive:
     name: "Test: Naive"
