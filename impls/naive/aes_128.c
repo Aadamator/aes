@@ -4,8 +4,8 @@
 #include "aes_128.h"
 
 #include "gf.h"
+#include "matrix.h"
 #include "s_box.h"
-#include "state_utils.h"
 
 static const uint8_t shifts[4] = {0, 1, 2, 3}; // Nb = 4 (AES-128)
 
@@ -78,7 +78,7 @@ void inverse_mix_columns(uint8_t state[16]) {
     uint8_t a[4][4] = {0};
     uint8_t b[4][4] = {0};
 
-    map_from_bytes(state, a);
+    matrix_from_array(state, a);
 
     for(j = 0; j < nb; j++) {
         for(i = 0; i < 4; i++) {
@@ -96,7 +96,7 @@ void inverse_mix_columns(uint8_t state[16]) {
     }
 
     // back to flat state
-    map_to_bytes(a, state);
+    matrix_to_array(a, state);
 }
 
 void inverse_shift_rows(uint8_t state[16]) {
@@ -105,7 +105,7 @@ void inverse_shift_rows(uint8_t state[16]) {
     uint8_t matrix[4][4];
     uint8_t tmp[nb];
 
-    map_from_bytes(state, matrix);
+    matrix_from_array(state, matrix);
 
     for (int i = 1; i < 4; i++) {
         for (j = 0; j < nb; j++) {
@@ -118,7 +118,7 @@ void inverse_shift_rows(uint8_t state[16]) {
     }
 
     // back to flat state
-    map_to_bytes(matrix, state);
+    matrix_to_array(matrix, state);
 }
 
 void mix_columns(uint8_t state[16]) {
@@ -128,7 +128,7 @@ void mix_columns(uint8_t state[16]) {
     uint8_t a[4][4] = {0};
     uint8_t b[4][4] = {0};
 
-    map_from_bytes(state, a);
+    matrix_from_array(state, a);
 
     for(j = 0; j < nb; j++) {
         for(i = 0; i < 4; i++) {
@@ -146,7 +146,7 @@ void mix_columns(uint8_t state[16]) {
     }
 
     // back to flat state
-    map_to_bytes(a, state);
+    matrix_to_array(a, state);
 }
 
 void shift_rows(uint8_t state[16]) {
@@ -155,7 +155,7 @@ void shift_rows(uint8_t state[16]) {
     uint8_t matrix[4][4];
     uint8_t tmp[nb];
 
-    map_from_bytes(state, matrix);
+    matrix_from_array(state, matrix);
 
     for (int i = 1; i < 4; i++) {
         for (j = 0; j < nb; j++) {
@@ -168,5 +168,5 @@ void shift_rows(uint8_t state[16]) {
     }
 
     // back to flat state
-    map_to_bytes(matrix, state);
+    matrix_to_array(matrix, state);
 }
