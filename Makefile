@@ -54,8 +54,7 @@ $(BENCHMARK_TARGETS): benchmark_%:
 	@./$(BUILD_DIR)/benchmarks/$*_benchmark \
        --benchmark_display_aggregates_only=true \
        --benchmark_out=./.benchmarks/$*_benchmark.json \
-       --benchmark_out_format=json \
-       --benchmark_repetitions=30 > /dev/null 2>&1
+       --benchmark_out_format=json > /dev/null 2>&1
 	@echo ">>> Finished $* benchmark"
 
 benchmark_report:

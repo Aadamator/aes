@@ -187,8 +187,7 @@ The third-party implementation is used to compare the performance of the AES imp
 ./build/benchmarks/<ni_instructions|naive|optimized|t_tables>_<decrypt|encrypt>_benchmark \
 		--benchmark_display_aggregates_only=true \
 		--benchmark_out=./.benchmarks/<ni_instructions|naive|optimized|t_tables>_<decrypt|encrypt>.json \
-		--benchmark_out_format=json \
-		--benchmark_repetitions=10
+		--benchmark_out_format=json
 ```
 
 > ⚠️ **NOTE:** You must create the `.benchmarks/` directory before running the benchmark.
