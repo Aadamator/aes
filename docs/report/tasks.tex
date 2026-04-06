@@ -1,6 +1,6 @@
 \subsection{Naive Implementation of AES-128}
 
-The naive implementation of our AES-128 algorithm is heavily inspired by the implementation of Rijndael/AES in the book \textit{The Design of Rijndael} \cite{rijndael}. This implementation sets the stage for the structure of the subsequent implementations by decomposing into the same conceptual steps as specified in the book, namely; \texttt{sub\_bytes}, \texttt{shift\_rows}, \texttt{mix\_columns}, and \texttt{add\_round\_key}. 
+The naive implementation of our AES-128 algorithm is heavily inspired by the implementation of Rijndael/AES in the book \textit{The Design of Rijndael} \cite{rijndael}. This implementation sets the stage for the structure of the subsequent implementations by decomposing into the same conceptual steps as specified in the book, namely; \texttt{sub\_bytes}, \texttt{shift\_rows}, \texttt{mix\_columns}, and \texttt{add\_round\_key}.
 
 In contrast to the more general Rijndael description in the book \cite{rijndael},
 our implementation is restricted to the AES-128 variant, and therefore
@@ -12,44 +12,114 @@ This makes the implementation closely follow the "textbook" structure and our un
 
 \subsection{Optimized Implementation of AES-128}
 
-\subsection{Implementation of AES using NI instructions}
+\subsection{Implementation of AES-128 using NI instructions}
+
+Up until now, AES has been implemented at the software level as algorithms written directly in C code. However, Intel introduced an extension instruction set for their x86 architecture known as Advanced Encryption Standard New Instructions (AES-NI). AES-NI allows complex AES operations to be executed directly on the hardware, significantly accelerating the encryption and decryption processes, while also mitigating the risk of side-channel attacks by eliminating the need for software-based lookup tables.
+
+In C, these hardware instructions are accessed through intrinsics from the \texttt{\textless wmmintrin.h\textgreater} header. This interface allows access to several instructions and types without the need to write the underlying assembly. The interface provides a convenient type \texttt{\_\_m128i}, which represents a 128-bit register, so an entire AES block can be loaded into a single CPU register and processed there rather than repeatedly reading and writing individual bytes in memory.
+
+A major consequence of using AES-NI is that several helper functions from the other implementations, such as \texttt{add\_round\_key}, \texttt{mix\_columns}, \texttt{shift\_rows}, \texttt{inverse\_mix\_columns} and \texttt{inverse\_shift\_rows}, are no longer needed in the encryption/decryption processes, since their work is effectively absorbed into the CPU instructions themselves.
+
+\subsubsection{Encryption}
+
+First the plaintext block and the first round key are loaded into hardware registers with \texttt{\_mm\_loadu\_si128}, and the initial key addition is performed with \texttt{\_mm\_xor\_si128}. Next, the nine main rounds are handled by \texttt{\_mm\_aesenc\_si128}, which applies the standard round transformation in hardware, and the final round is performed by \texttt{\_mm\_aesenclast\_si128} - a separate instruction because the last AES round, as mentioned before, omits the mix columns step.
+
+Once the computation is finished, the resulting ciphertext is copied back to memory using \texttt{\_mm\_storeu\_si128}.
+
+\subsubsection{Decryption}
+
+As with encryption, decryption follows the same overall idea, but using the inverse hardware instructions. The ciphertext is loaded into a register, combined with the last round key, and then processed through \texttt{\_mm\_aesdec\_si128} for the intermediate rounds. Finally, the special \texttt{\_mm\_aesdeclast\_si128} instruction is used for the last round to omit the inverse mix columns step. Before those intermediate decryption rounds, each round key is transformed with \texttt{\_mm\_aesimc\_si128}, because the decryption instructions expect the keys in a form adapted to the inverse round structure.
+
+Similar to the encryption process, once the computation is finished, the resulting plaintext is copied back to memory using \texttt{\_mm\_storeu\_si128}.
 
 \subsection{Implementation of AES-128 using T-tables}
 
 \subsection{Benchmarking}
 
-To benchmark our AES-128 implementations, we used libsodium's \cite{libsodium_ip_address_encryption} AES-128 single-block encryption (through its \texttt{crypto\_ipcrypt} API) and we used Google's Benchmark \cite{google_benchmark} to measure single-block encryption latency. 
+To evaluate the performance of our four AES-128 implementations, we utilized Google's Benchmark framework \cite{google_benchmark} to measure single-block encryption latency. All benchmarks were compiled with compiler optimizations enabled to reflect realistic, production-level execution speeds. Furthermore, the benchmarking measurements explicitly isolate the encryption/decryption phases, entirely excluding the key-schedule generation process (this is performed once per run to avoid unnecessary overhead).
 
-Each implementation was tested with 1,000,000 iterations, reporting both mean and median latencies in clock cycles. The mean provides the average performance across all runs (sensitive to occasional outliers), while the median gives a more robust central tendency by discarding extreme measurements, making it ideal for comparing consistent real-world performance. 
+Each implementation was configured to run for 1,000,000 iterations per test. To ensure the processor cache was properly warmed up and to obtain statistically robust results, we set the framework to perform 30 repetitions of these tests. From these repetitions, we recorded both the mean and median latencies (measured in nanoseconds per operation, ns/op). The mean provides the average performance across all runs, which is sensitive to occasional system outliers. The median gives a more robust central tendency by discarding extreme measurements caused by OS interruptions, making it an ideal metric for comparing consistent, real-world performance.
 
-All tests ran on the same hardware with compiler optimizations disabled to isolate algorithmic differences.
+To serve as a baseline for comparison against a production-grade implementation, we also benchmarked the AES-128 single-block encryption routine from the Mbed TLS library \cite{mbedtls_library}. The performance profiles for both encryption and decryption across all implementations are summarized and compared in the tables below.
 
-\begin{center}
-    \begin{tabular}{|l|c|c|c|} 
-        \hline
-            \textbf{Implementation} &
-            \textbf{Mean Latency} &
-            \textbf{Median Latency} \\ [0.5ex]
-        \hline\hline
-            Naive &
-            - ns/op &
-            - ns/op \\
-        \hline
-            Optimized &
-            - ns/op &
-            - ns/op \\
-        \hline
-            AES-NI &
-            - ns/op &
-            - ns/op \\ 
-        \hline
-            Using T-tables &
-            - ns/op &
-            - ns/op \\ 
-        \hline
-            libsodium &
-            - ns/op &
-            - ns/op \\ 
-        \hline 
+\begin{table}[H]
+  \caption{Benchmark results for the encryption implementations.}
+  \label{benchmark_encryption_table}
+  \begin{center}
+    \begin{tabular}{|l|c|c|c|}
+      \hline
+      \textbf{Implementation} &
+      \textbf{Mean Latency} &
+      \textbf{Median Latency} &
+      \textbf{Iterations} \\ [0.5ex]
+      \hline\hline
+      Naive &
+      - ns/op &
+      - ns/op &
+      - \\
+      \hline
+      Optimized &
+      - ns/op &
+      - ns/op &
+      - \\
+      \hline
+      Using T-tables &
+      - ns/op &
+      - ns/op &
+      - \\
+      \hline
+      NI Instructions &
+      - ns/op &
+      - ns/op &
+      - \\
+      \hline
+      Library (Mbed-TLS) &
+      - ns/op &
+      - ns/op &
+      - \\
+      \hline
     \end{tabular}
-\end{center}
+  \end{center}
+\end{table}
+
+\begin{table}[H]
+  \caption{Benchmark results for the decryption implementations.}
+  \label{benchmark_decryption_table}
+  \begin{center}
+    \begin{tabular}{|l|c|c|c|}
+      \hline
+      \textbf{Implementation} &
+      \textbf{Mean Latency} &
+      \textbf{Median Latency} &
+      \textbf{Iterations} \\ [0.5ex]
+      \hline\hline
+      Naive &
+      - ns/op &
+      - ns/op &
+      - \\
+      \hline
+      Optimized &
+      - ns/op &
+      - ns/op &
+      - \\
+      \hline
+      Using T-tables &
+      - ns/op &
+      - ns/op &
+      - \\
+      \hline
+      NI Instructions &
+      - ns/op &
+      - ns/op &
+      - \\
+      \hline
+      Library (Mbed-TLS) &
+      - ns/op &
+      - ns/op &
+      - \\
+      \hline
+    \end{tabular}
+  \end{center}
+\end{table}
+
+% Discuss the results here

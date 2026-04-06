@@ -31,4 +31,4 @@ static void BMLibraryDecrypt(benchmark::State& state) {
   mbedtls_aes_free(&aes);
 }
 
-BENCHMARK(BMLibraryDecrypt)->Name(AES_LIBRARY_NAME);
+BENCHMARK(BMLibraryDecrypt)->Iterations(iterations)->Repetitions(repetitions)->Name(AES_LIBRARY_NAME);

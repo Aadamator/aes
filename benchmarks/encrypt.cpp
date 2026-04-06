@@ -29,4 +29,4 @@ static void BMEncrypt(benchmark::State& state) {
   }
 }
 
-BENCHMARK(BMEncrypt)->Name(AES_IMPLEMENTATION_NAME);
+BENCHMARK(BMEncrypt)->Iterations(iterations)->Repetitions(repetitions)->Name(AES_IMPLEMENTATION_NAME);

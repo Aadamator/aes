@@ -21,18 +21,19 @@ function(add_aes_test test_name aes_implementation_name test_source)
     add_test(NAME ${test_name} COMMAND ${test_name})
 endfunction()
 
-# aes_ni tests
-add_aes_test(aes_ni_decrypt_tests aes_128_ni decrypt.c)
-add_aes_test(aes_ni_encrypt_tests aes_128_ni encrypt.c)
-
 # naive tests
-add_aes_test(naive_decrypt_tests aes_128_naive decrypt.c)
-add_aes_test(naive_encrypt_tests aes_128_naive encrypt.c)
+add_aes_test(test_naive_decrypt aes_128_naive test_decrypt.c)
+add_aes_test(test_naive_encrypt aes_128_naive test_encrypt.c)
+add_aes_test(test_naive_encrypt_rounds aes_128_naive test_encrypt_rounds.c)
+
+# ni_instructions tests
+add_aes_test(test_ni_instructions_decrypt aes_128_ni_instructions test_decrypt.c)
+add_aes_test(test_ni_instructions_encrypt aes_128_ni_instructions test_encrypt.c)
 
 # optimized tests
-add_aes_test(optimized_decrypt_tests aes_128_optimized decrypt.c)
-add_aes_test(optimized_encrypt_tests aes_128_optimized encrypt.c)
+add_aes_test(test_optimized_decrypt aes_128_optimized test_decrypt.c)
+add_aes_test(test_optimized_encrypt aes_128_optimized test_encrypt.c)
 
 # t_tables tests
-add_aes_test(t_tables_decrypt_tests aes_128_t_tables decrypt.c)
-add_aes_test(t_tables_encrypt_tests aes_128_t_tables encrypt.c)
+add_aes_test(test_t_tables_decrypt aes_128_t_tables test_decrypt.c)
+add_aes_test(test_t_tables_encrypt aes_128_t_tables test_encrypt.c)
