@@ -25,7 +25,7 @@
  * @param array     16-byte block to map to the matrix.
  * @param matrix    4x4 matrix to map from the bytes.
  */
-void matrix_from_array(const uint8_t array[16], uint8_t matrix[4][4]);
+void matrix_from_array(const uint8_t (*array)[16], uint8_t matrix[4][4]);
 
 /**
  * @brief Maps the contents of a 4x4 matrix to a 16-byte block.
@@ -49,4 +49,4 @@ void matrix_from_array(const uint8_t array[16], uint8_t matrix[4][4]);
  * @param matrix    4x4 matrix to map to the bytes.
  * @param array     16-byte block to map from the matrix.
  */
-void matrix_to_array(const uint8_t matrix[4][4], uint8_t array[16]);
+void matrix_to_array(const uint8_t matrix[4][4], uint8_t (*array)[16]);

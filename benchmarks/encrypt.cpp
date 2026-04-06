@@ -22,7 +22,7 @@ static void BMEncrypt(benchmark::State& state) {
   key_expansion(&key, key_schedules);
 
   for (auto _ : state) {
-    encrypt(key_schedules, plaintext, ciphertext);
+    encrypt(key_schedules, &plaintext, &ciphertext);
 
     benchmark::DoNotOptimize(ciphertext);
     benchmark::ClobberMemory();
