@@ -28,7 +28,7 @@ Once the computation is finished, the resulting ciphertext is copied back to mem
 
 \subsubsection{Decryption}
 
-As with encryption, decryption follows the same overall idea, but using the inverse hardware instructions. The ciphertext is loaded into a register, combined with the last round key, and then processed through \texttt{\_mm\_aesdec\_si128} for the intermediate rounds. Finally, the special \texttt{\_mm\_aesdeclast\_si128} iinstruction is used for the last round to omit the inverse mix columns step. Before those intermediate decryption rounds, each round key is transformed with \texttt{\_mm\_aesimc\_si128}, because the decryption instructions expect the keys in a form adapted to the inverse round structure.
+As with encryption, decryption follows the same overall idea, but using the inverse hardware instructions. The ciphertext is loaded into a register, combined with the last round key, and then processed through \texttt{\_mm\_aesdec\_si128} for the intermediate rounds. Finally, the special \texttt{\_mm\_aesdeclast\_si128} instruction is used for the last round to omit the inverse mix columns step. Before those intermediate decryption rounds, each round key is transformed with \texttt{\_mm\_aesimc\_si128}, because the decryption instructions expect the keys in a form adapted to the inverse round structure.
 
 Similar to the encryption process, once the computation is finished, the resulting plaintext is copied back to memory using \texttt{\_mm\_storeu\_si128}.
 
@@ -43,83 +43,83 @@ Each implementation was configured to run for 1,000,000 iterations per test. To 
 To serve as a baseline for comparison against a production-grade implementation, we also benchmarked the AES-128 single-block encryption routine from the Mbed TLS library \cite{mbedtls_library}. The performance profiles for both encryption and decryption across all implementations are summarized and compared in the tables below.
 
 \begin{table}[H]
-    \caption{Benchmark results for the encryption implementations.}
-    \label{benchmark_encryption_table}
-    \begin{center}
-        \begin{tabular}{|l|c|c|c|}
-            \hline
-                \textbf{Implementation} &
-                \textbf{Mean Latency} &
-                \textbf{Median Latency} &
-                \textbf{Iterations} \\ [0.5ex]
-            \hline\hline
-                Naive &
-                - ns/op &
-                - ns/op &
-                - \\
-            \hline
-                Optimized &
-                - ns/op &
-                - ns/op &
-                - \\
-            \hline
-                Using T-tables &
-                - ns/op &
-                - ns/op &
-                - \\
-            \hline
-                NI Instructions &
-                - ns/op &
-                - ns/op &
-                - \\
-            \hline
-                Library (Mbed-TLS) &
-                - ns/op &
-                - ns/op &
-                - \\
-            \hline
-        \end{tabular}
-    \end{center}
+  \caption{Benchmark results for the encryption implementations.}
+  \label{benchmark_encryption_table}
+  \begin{center}
+    \begin{tabular}{|l|c|c|c|}
+      \hline
+      \textbf{Implementation} &
+      \textbf{Mean Latency} &
+      \textbf{Median Latency} &
+      \textbf{Iterations} \\ [0.5ex]
+      \hline\hline
+      Naive &
+      - ns/op &
+      - ns/op &
+      - \\
+      \hline
+      Optimized &
+      - ns/op &
+      - ns/op &
+      - \\
+      \hline
+      Using T-tables &
+      - ns/op &
+      - ns/op &
+      - \\
+      \hline
+      NI Instructions &
+      - ns/op &
+      - ns/op &
+      - \\
+      \hline
+      Library (Mbed-TLS) &
+      - ns/op &
+      - ns/op &
+      - \\
+      \hline
+    \end{tabular}
+  \end{center}
 \end{table}
 
 \begin{table}[H]
-    \caption{Benchmark results for the decryption implementations.}
-    \label{benchmark_decryption_table}
-    \begin{center}
-        \begin{tabular}{|l|c|c|c|}
-            \hline
-                \textbf{Implementation} &
-                \textbf{Mean Latency} &
-                \textbf{Median Latency} &
-                \textbf{Iterations} \\ [0.5ex]
-            \hline\hline
-                Naive &
-                - ns/op &
-                - ns/op &
-                - \\
-            \hline
-                Optimized &
-                - ns/op &
-                - ns/op &
-                - \\
-            \hline
-                Using T-tables &
-                - ns/op &
-                - ns/op &
-                - \\
-            \hline
-                NI Instructions &
-                - ns/op &
-                - ns/op &
-                - \\
-            \hline
-                Library (Mbed-TLS) &
-                - ns/op &
-                - ns/op &
-                - \\
-            \hline
-        \end{tabular}
-    \end{center}
+  \caption{Benchmark results for the decryption implementations.}
+  \label{benchmark_decryption_table}
+  \begin{center}
+    \begin{tabular}{|l|c|c|c|}
+      \hline
+      \textbf{Implementation} &
+      \textbf{Mean Latency} &
+      \textbf{Median Latency} &
+      \textbf{Iterations} \\ [0.5ex]
+      \hline\hline
+      Naive &
+      - ns/op &
+      - ns/op &
+      - \\
+      \hline
+      Optimized &
+      - ns/op &
+      - ns/op &
+      - \\
+      \hline
+      Using T-tables &
+      - ns/op &
+      - ns/op &
+      - \\
+      \hline
+      NI Instructions &
+      - ns/op &
+      - ns/op &
+      - \\
+      \hline
+      Library (Mbed-TLS) &
+      - ns/op &
+      - ns/op &
+      - \\
+      \hline
+    \end{tabular}
+  \end{center}
 \end{table}
 
 % Discuss the results here
