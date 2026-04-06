@@ -23,7 +23,7 @@ static void sub_word(uint8_t *word) {
     }
 }
 
-void key_expansion(const uint8_t (*cipherkey)[16], uint8_t key_schedules[11][16]) {
+void key_expansion(const uint8_t cipherkey[16], uint8_t key_schedules[11][16]) {
     // copy cipher key to the first position
     memcpy(key_schedules[0], cipherkey, 16);
 

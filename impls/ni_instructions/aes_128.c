@@ -3,9 +3,9 @@
 
 #include "aes_128.h"
 
-void add_round_key(const uint8_t round_key[16], uint8_t (*state)[16]) {}
+void add_round_key(const uint8_t round_key[16], uint8_t state[4][4]) {}
 
-int decrypt(const uint8_t key_schedules[11][16], const uint8_t (*ciphertext)[16], uint8_t (*plaintext)[16]) {
+int decrypt(const uint8_t key_schedules[11][16], const uint8_t ciphertext[16], uint8_t plaintext[16]) {
     __m128i round_key = _mm_loadu_si128((const __m128i*)key_schedules[10]); // initial key addition (starts with the last key schedule)
     __m128i state = _mm_loadu_si128((const __m128i*)ciphertext); // load the ciphertext into a 128-bit hardware register
 
@@ -32,7 +32,7 @@ int decrypt(const uint8_t key_schedules[11][16], const uint8_t (*ciphertext)[16]
     return 0;
 }
 
-int encrypt(const uint8_t key_schedules[11][16], const uint8_t (*plaintext)[16], uint8_t (*ciphertext)[16]) {
+int encrypt(const uint8_t key_schedules[11][16], const uint8_t plaintext[16], uint8_t ciphertext[16]) {
     __m128i round_key = _mm_loadu_si128((const __m128i*)key_schedules[0]); // begin with a key addition (round 0) by xor-ing (add_round_key) directly using the hardware registers
     __m128i state = _mm_loadu_si128((const __m128i*)plaintext); // load the plaintext into a 128-bit hardware register
 
@@ -44,7 +44,8 @@ int encrypt(const uint8_t key_schedules[11][16], const uint8_t (*plaintext)[16],
         state = _mm_aesenc_si128(state, round_key);
     }
 
-    // last round is special: as there are no mix_columns, a separate function is used for the final round
+    // the last round is special: as there are no mix_columns, a separate function is used for the
+    // final round
     round_key = _mm_loadu_si128((const __m128i*)key_schedules[10]);
     state = _mm_aesenclast_si128(state, round_key);
 
@@ -54,10 +55,10 @@ int encrypt(const uint8_t key_schedules[11][16], const uint8_t (*plaintext)[16],
     return 0;
 }
 
-void inverse_mix_columns(uint8_t (*state)[16]) {}
+void inverse_mix_columns(uint8_t state[4][4]) {}
 
-void inverse_shift_rows(uint8_t (*state)[16]) {}
+void inverse_shift_rows(uint8_t state[4][4]) {}
 
-void mix_columns(uint8_t (*state)[16]) {}
+void mix_columns(uint8_t state[4][4]) {}
 
-void shift_rows(uint8_t (*state)[16]) {}
+void shift_rows(uint8_t state[4][4]) {}
