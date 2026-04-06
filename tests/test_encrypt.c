@@ -38,7 +38,7 @@ static void test_encrypt(void) {
         NULL, NULL, NULL);
 
     // pre-compute the round keys
-    key_expansion(key, key_schedules);
+    key_expansion(&key, key_schedules);
 
     encrypt(key_schedules, plaintext, ciphertext);
 

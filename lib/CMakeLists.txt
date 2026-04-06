@@ -1,6 +1,5 @@
 add_library(aes_lib
     STATIC
-    constants.c
     gf.c
     keys.c
     s_box.c

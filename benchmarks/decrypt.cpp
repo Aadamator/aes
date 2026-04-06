@@ -19,7 +19,7 @@ static void BMDecrypt(benchmark::State& state) {
   hex_to_bytes(ciphertext_as_hex, ciphertext);
 
   // pre-compute the round keys
-  key_expansion(key, key_schedules);
+  key_expansion(&key, key_schedules);
 
   for (auto _ : state) {
     decrypt(key_schedules, ciphertext, plaintext);

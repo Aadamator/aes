@@ -107,7 +107,7 @@ static void test_encrypt_rounds() {
         );
 
     // pre-compute the round keys
-    key_expansion(key, key_schedules);
+    key_expansion(&key, key_schedules);
 
     // initialize for R[00] - before the rounds
     add_round_key(key_schedules[0], state);
