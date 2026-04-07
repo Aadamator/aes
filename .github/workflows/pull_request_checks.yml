@@ -76,3 +76,40 @@ jobs:
         run: make build
       - name: "🧪 Test"
         run: make test_t_tables
+
+  benchmarks:
+#    needs: [build, test_aes_ni, test_naive, test_optimized, test_t_tables]
+    name: "Benchmark"
+    permissions:
+      pull-requests: write
+    runs-on: ubuntu-latest
+    steps:
+      - name: "🛎 Checkout"
+        uses: actions/checkout@v4
+      - name: "🔧 Setup C Toolchain"
+        uses: ./.github/actions/use-c-toolchain
+      - name: "🔧 Configure"
+        run: make configure
+      - name: "🏗️ Build"
+        run: make build
+      - name: "📊 Benchmark"
+        run: make -j benchmark
+      - name: "📑 Report"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # aggregate the benchmark results and pipe the output to a file
+          make benchmark_report > benchmark_report.txt
+          # add the aggregated report to an environment variable
+          echo "BENCHMARK_RESULT<<EOF" >> $GITHUB_ENV
+          cat benchmark_report.txt >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
+      - name: "📝 Post Report"
+        uses: mshick/add-pr-comment@v2
+        with:
+          message-id: benchmark-results
+          message: |
+            ### 📊 Benchmark Results
+            ```text
+            ${{ env.BENCHMARK_RESULT }}
+            ```
