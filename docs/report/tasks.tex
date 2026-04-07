@@ -101,7 +101,7 @@ The state then undergoes nine inverse rounds. Because the operations are applied
 
 Similar to the encryption operation flow, the \texttt{inverse\_mix\_columns} step utilizes matrix multiplication over $\text{GF}(2^8)$, but with a different set of fixed polynomial constants.
 
-Finally, a concluding \texttt{add\_round\_key} (much like the round 0 in the encryption process) is applied using the very first key from the key schedule, and then the decrypted state is flattened back into the 16-byte plaintext array. Thus, fully reversing the encryption process.
+Finally, a concluding \texttt{add\_round\_key} (much like round 0 in the encryption process) is applied using the very first key from the key schedule, and then the decrypted state is flattened back into the 16-byte plaintext array. Thus, fully reversing the encryption process.
 
 \subsection{Optimized Implementation of AES-128}
 
