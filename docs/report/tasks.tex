@@ -1,55 +1,218 @@
 \subsection{Naive Implementation of AES-128}
 
-The naive implementation of our AES-128 algorithm is heavily inspired by the implementation of Rijndael/AES in the book \textit{The Design of Rijndael} \cite{rijndael}. This implementation sets the stage for the structure of the subsequent implementations by decomposing into the same conceptual steps as specified in the book, namely; \texttt{sub\_bytes}, \texttt{shift\_rows}, \texttt{mix\_columns}, and \texttt{add\_round\_key}. 
+The naive implementation of our AES-128 algorithm is heavily inspired by the implementation of Rijndael/AES in the book \textit{The Design of Rijndael} \cite{rijndael}. This implementation sets the stage for the structure of all the following subsequent implementations by decomposing into the same conceptual steps as specified in the book, namely; \texttt{SubBytes}, \texttt{ShiftRows}, \texttt{MixColumns}, and \texttt{AddRoundKey}.
 
 In contrast to the more general Rijndael description in the book \cite{rijndael},
 our implementation is restricted to the AES-128 variant, and therefore
-only considers the case $N_{b} = 4$ (corresponding to a 128-bit block).
+only considers the case when $N_{b} = 4$ (corresponding to a 128-bit block).
 
 Using the test vectors from the book \cite{rijndael_test_vectors}, we tested not only full end-to-end encryption/decryption, but also the intermediate states before/after each transformation step at each round. Because every transformation step is a separate testable function, we can evaluate these known intermediate states and assert that the output matches the published state for that step.
 
 This makes the implementation closely follow the "textbook" structure and our unit testing approach also allows us to isolate regressions by having fine-grained tests that fail as soon as a single transformation deviates, rather than only detecting mismatches at the final ciphertext.
 
+\subsubsection{Encryption}
+
+Before the encryption process, a set of key schedules are pre-computed.
+
+The encryption process begins by mapping a 16-byte plaintext array to a $4 \times 4$ matrix. This matrix is what we have aptly named the "state" and is what we will perform the operations upon. Each byte is arranged in the following form:
+
+\begin{figure}[H]
+    \begin{align*}
+        \begin{bmatrix}
+            p_{0} & p_{4} & p_{8} & p_{12} \\
+            p_{1} & p_{5} & p_{9} & p_{13} \\
+            p_{2} & p_{6} & p_{10} & p_{14} \\
+            p_{3} & p_{7} & p_{11} & p_{15}
+        \end{bmatrix}
+    \end{align*}
+    \caption{16-byte block transformed to a $4 \times 4$ matrix.}
+    \label{fig:state_matrix}
+\end{figure}
+
+\noindent
+The core of the encryption process is broken into four distinct operations:
+
+\begin{itemize}
+    \item \textbf{add\_round\_key}: Using the round as the index for the pre-computed key schedules, the extracted 16-byte "round key" is transformed into a matrix just as we did with the state. Then a bitwise XOR is applied between the state and this "round key" matrix and the state is then updated with this new transformation. 
+    
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.7\textwidth]{images/add_round_key.png}
+        \caption{AddRoundKey transformation \cite{add_round_key_image}.}
+        \label{fig:add_round_key}
+    \end{figure}
+
+    \item \texttt{sub\_bytes}: A non-linear substitution step where each byte in the state is replaced with a corresponding byte from a fixed lookup table (the S-box).
+
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.7\textwidth]{images/sub_bytes.png}
+        \caption{SubBytes transformation \cite{sub_bytes_image}.}
+        \label{fig:sub_bytes}
+    \end{figure}
+    
+    \item \textbf{shift\_rows}: A transposition step that cyclically shifts the bytes in the last three rows of the state by varying offsets. The first row remains unchanged, while the second, third, and fourth rows are shifted to the left by one, two, and three bytes, respectively.
+
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.7\textwidth]{images/shift_rows.png}
+        \caption{ShiftRows transformation \cite{shift_rows_image}.}
+        \label{fig:shift_rows}
+    \end{figure}
+    
+    \item \textbf{mix\_columns}: A linear mixing operation where each column of the state is treated as a polynomial over the Galois Field $\text{GF}(2^8)$ and multiplied by a fixed matrix. This step provides critical diffusion to the cipher.
+
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.7\textwidth]{images/mix_columns.png}
+        \caption{MixColumns transformation \cite{mix_columns_image}.}
+        \label{fig:mix_columns}
+    \end{figure}
+
+\end{itemize}
+
+We start with round 0, which simply applies an initial \texttt{add\_round\_key} operation. 
+
+Following the initial key addition, the state undergoes nine identical ordinary rounds. Each round applies the four transformations mentioned above in the sequence shown in \ref{fig:encryption_round}.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[height=0.4\textwidth]{images/encryption_round.png}
+    \caption{Decryption round. \texttt{mix\_columns} is omitted in the last round.}
+    \label{fig:encryption_round}
+\end{figure}
+
+The tenth and final round is slightly different; it applies the normal operations, but explicitly omits the \texttt{mix\_columns} step. Finally, the resulting state matrix is flattened back into a 1-dimensional 16-byte ciphertext array.
+
+\subsubsection{Decryption}
+
+Similar to the encryption process, the key schedules are pre-computed and the 16-byte ciphertext is transformed into a $4 \times 4$ state matrix. 
+
+The decryption process undoes the encryption by applying the inverse of each transformation in reverse order beginning with the initial \texttt{add\_round\_key}, using the final round key of the pre-computed key schedules, followed by \texttt{inverse\_sub\_bytes} and \texttt{inverse\_shift\_rows}.
+
+The state then undergoes nine inverse rounds. Because the operations are applied in reverse, each round consists of the sequence shown in \ref{fig:decryption_round}. 
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[height=0.4\textwidth]{images/decryption_round.png}
+    \caption{Decryption round. \texttt{inverse\_mix\_columns} is omitted in the first round.}
+    \label{fig:decryption_round}
+\end{figure}
+
+Similar to the encryption operation flow, the \texttt{inverse\_mix\_columns} step utilizes matrix multiplication over $\text{GF}(2^8)$, but with a different set of fixed polynomial constants. 
+
+Finally, a concluding \texttt{add\_round\_key} (much like the round 0 in the encryption process) is applied using the very first key from the key schedule, and then the decrypted state is flattened back into the 16-byte plaintext array. Thus, fully reversing the encryption process.
+
 \subsection{Optimized Implementation of AES-128}
 
-\subsection{Implementation of AES using NI instructions}
+\subsection{Implementation of AES-128 using NI instructions}
+
+Up until now, AES has been implemented at the software level as algorithms written directly in C code. However, Intel introduced an extension instruction set for their x86 architecture known as Advanced Encryption Standard New Instructions (AES-NI). AES-NI allows complex AES operations to be executed directly on the hardware, significantly accelerating the encryption and decryption processes, while also mitigating the risk of side-channel attacks by eliminating the need for software-based lookup tables.
+
+In C, these hardware instructions are accessed through intrinsics from the \texttt{\textless wmmintrin.h\textgreater} header. This interface allows access to several instructions and types without the need to write the underlying assembly. The interface provides a convenient type \texttt{\_\_m128i}, which represents a 128-bit register, so an entire AES block can be loaded into a single CPU register and processed there rather than repeatedly reading and writing individual bytes in memory.
+
+A major consequence of using AES-NI is that several helper functions from the other implementations, such as \texttt{add\_round\_key}, \texttt{mix\_columns}, \texttt{shift\_rows}, \texttt{inverse\_mix\_columns} and \texttt{inverse\_shift\_rows}, are no longer needed in the encryption/decryption processes, since their work is effectively absorbed into the CPU instructions themselves. 
+
+\subsubsection{Encryption}
+
+First the plaintext block and the first round key are loaded into hardware registers with \texttt{\_mm\_loadu\_si128}, and the initial key addition is performed with \texttt{\_mm\_xor\_si128}. Next, the nine main rounds are handled by \texttt{\_mm\_aesenc\_si128}, which applies the standard round transformation in hardware, and the final round is performed by \texttt{\_mm\_aesenclast\_si128} - a separate instruction because the last AES round, as mentioned before, omits the mix columns step. 
+
+Once the computation is finished, the resulting ciphertext is copied back to memory using \texttt{\_mm\_storeu\_si128}.
+
+\subsubsection{Decryption}
+
+As with encryption, decryption follows the same overall idea, but using the inverse hardware instructions. The ciphertext is loaded into a register, combined with the last round key, and then processed through \texttt{\_mm\_aesdec\_si128} for the intermediate rounds. Finally, the special \texttt{\_mm\_aesdeclast\_si128} instruction is used for the last round to omit the inverse mix columns step. Before those intermediate decryption rounds, each round key is transformed with \texttt{\_mm\_aesimc\_si128}, because the decryption instructions expect the keys in a form adapted to the inverse round structure.
+
+Similar to the encryption process, once the computation is finished, the resulting plaintext is copied back to memory using \texttt{\_mm\_storeu\_si128}.
 
 \subsection{Implementation of AES-128 using T-tables}
 
 \subsection{Benchmarking}
 
-To benchmark our AES-128 implementations, we used libsodium's \cite{libsodium_ip_address_encryption} AES-128 single-block encryption (through its \texttt{crypto\_ipcrypt} API) and we used Google's Benchmark \cite{google_benchmark} to measure single-block encryption latency. 
+To evaluate the performance of our four AES-128 implementations, we utilized Google's Benchmark framework \cite{google_benchmark} to measure single-block encryption latency. All benchmarks were compiled with compiler optimizations enabled to reflect realistic, production-level execution speeds. Furthermore, the benchmarking measurements explicitly isolate the encryption/decryption phases, entirely excluding the key-schedule generation process (this is performed once per run to avoid unnecessary overhead).
 
-Each implementation was tested with 1,000,000 iterations, reporting both mean and median latencies in clock cycles. The mean provides the average performance across all runs (sensitive to occasional outliers), while the median gives a more robust central tendency by discarding extreme measurements, making it ideal for comparing consistent real-world performance. 
+Each implementation was configured to run for 1,000,000 iterations per test. To ensure the processor cache was properly warmed up and to obtain statistically robust results, we set the framework to perform 30 repetitions of these tests. From these repetitions, we recorded both the mean and median latencies (measured in nanoseconds per operation, ns/op). The mean provides the average performance across all runs, which is sensitive to occasional system outliers. The median gives a more robust central tendency by discarding extreme measurements caused by OS interruptions, making it an ideal metric for comparing consistent, real-world performance.
 
-All tests ran on the same hardware with compiler optimizations disabled to isolate algorithmic differences.
+To serve as a baseline for comparison against a production-grade implementation, we also benchmarked the AES-128 single-block encryption routine from the Mbed TLS library \cite{mbedtls_library}. The performance profiles for both encryption and decryption across all implementations are summarized and compared in the tables below.
 
-\begin{center}
-    \begin{tabular}{|l|c|c|c|} 
-        \hline
-            \textbf{Implementation} &
-            \textbf{Mean Latency} &
-            \textbf{Median Latency} \\ [0.5ex]
-        \hline\hline
-            Naive &
-            - ns/op &
-            - ns/op \\
-        \hline
-            Optimized &
-            - ns/op &
-            - ns/op \\
-        \hline
-            AES-NI &
-            - ns/op &
-            - ns/op \\ 
-        \hline
-            Using T-tables &
-            - ns/op &
-            - ns/op \\ 
-        \hline
-            libsodium &
-            - ns/op &
-            - ns/op \\ 
-        \hline 
-    \end{tabular}
-\end{center}
+\begin{table}[H]
+    \caption{Benchmark results for the encryption implementations.}
+    \label{benchmark_encryption_table}
+    \begin{center}
+        \begin{tabular}{|l|c|c|c|} 
+            \hline
+                \textbf{Implementation} &
+                \textbf{Mean Latency} &
+                \textbf{Median Latency} &
+                \textbf{Iterations} \\ [0.5ex]
+            \hline\hline
+                Naive &
+                - ns/op &
+                - ns/op &
+                - \\
+            \hline
+                Optimized &
+                - ns/op &
+                - ns/op &
+                - \\
+            \hline
+                Using T-tables &
+                - ns/op &
+                - ns/op &
+                - \\
+            \hline
+                NI Instructions &
+                - ns/op &
+                - ns/op &
+                - \\
+            \hline
+                Library (Mbed-TLS) &
+                - ns/op &
+                - ns/op &
+                - \\
+            \hline 
+        \end{tabular}
+    \end{center}
+\end{table}
+
+\begin{table}[H]
+    \caption{Benchmark results for the decryption implementations.}
+    \label{benchmark_decryption_table}
+    \begin{center}
+        \begin{tabular}{|l|c|c|c|} 
+            \hline
+                \textbf{Implementation} &
+                \textbf{Mean Latency} &
+                \textbf{Median Latency} &
+                \textbf{Iterations} \\ [0.5ex]
+            \hline\hline
+                Naive &
+                - ns/op &
+                - ns/op &
+                - \\
+            \hline
+                Optimized &
+                - ns/op &
+                - ns/op &
+                - \\
+            \hline
+                Using T-tables &
+                - ns/op &
+                - ns/op &
+                - \\
+            \hline
+                NI Instructions &
+                - ns/op &
+                - ns/op &
+                - \\
+            \hline
+                Library (Mbed-TLS) &
+                - ns/op &
+                - ns/op &
+                - \\
+            \hline 
+        \end{tabular}
+    \end{center}
+\end{table}
+
+% Discuss the results here
