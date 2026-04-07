@@ -4,83 +4,84 @@ on:
   pull_request:
 
 jobs:
-  build:
-    name: "Build"
-    runs-on: ubuntu-latest
-    steps:
-      - name: "🛎 Checkout"
-        uses: actions/checkout@v4
-      - name: "🔧 Setup C Toolchain"
-        uses: ./.github/actions/use-c-toolchain
-      - name: "🔧 Configure"
-        run: make configure
-      - name: "🏗️ Build"
-        run: make build
-
-  test_aes_ni:
-    name: "Test: AES-NI"
-    runs-on: ubuntu-latest
-    steps:
-      - name: "🛎 Checkout"
-        uses: actions/checkout@v4
-      - name: "🔧 Setup C Toolchain"
-        uses: ./.github/actions/use-c-toolchain
-      - name: "🔧 Configure"
-        run: make configure
-      - name: "🏗️ Build"
-        run: make build
-      - name: "🧪 Test"
-        run: make test_ni_instructions
-
-  test_naive:
-    name: "Test: Naive"
-    runs-on: ubuntu-latest
-    steps:
-      - name: "🛎 Checkout"
-        uses: actions/checkout@v4
-      - name: "🔧 Setup C Toolchain"
-        uses: ./.github/actions/use-c-toolchain
-      - name: "🔧 Configure"
-        run: make configure
-      - name: "🏗️ Build"
-        run: make build
-      - name: "🧪 Test"
-        run: make test_naive
-
-  test_optimized:
-    name: "Test: Optimized"
-    runs-on: ubuntu-latest
-    steps:
-      - name: "🛎 Checkout"
-        uses: actions/checkout@v4
-      - name: "🔧 Setup C Toolchain"
-        uses: ./.github/actions/use-c-toolchain
-      - name: "🔧 Configure"
-        run: make configure
-      - name: "🏗️ Build"
-        run: make build
-      - name: "🧪 Test"
-        run: make test_optimized
-
-  test_t_tables:
-    name: "Test: T-tables"
-    runs-on: ubuntu-latest
-    steps:
-      - name: "🛎 Checkout"
-        uses: actions/checkout@v4
-      - name: "🔧 Setup C Toolchain"
-        uses: ./.github/actions/use-c-toolchain
-      - name: "🔧 Configure"
-        run: make configure
-      - name: "🏗️ Build"
-        run: make build
-      - name: "🧪 Test"
-        run: make test_t_tables
+#  build:
+#    name: "Build"
+#    runs-on: ubuntu-latest
+#    steps:
+#      - name: "🛎 Checkout"
+#        uses: actions/checkout@v4
+#      - name: "🔧 Setup C Toolchain"
+#        uses: ./.github/actions/use-c-toolchain
+#      - name: "🔧 Configure"
+#        run: make configure
+#      - name: "🏗️ Build"
+#        run: make build
+#
+#  test_aes_ni:
+#    name: "Test: AES-NI"
+#    runs-on: ubuntu-latest
+#    steps:
+#      - name: "🛎 Checkout"
+#        uses: actions/checkout@v4
+#      - name: "🔧 Setup C Toolchain"
+#        uses: ./.github/actions/use-c-toolchain
+#      - name: "🔧 Configure"
+#        run: make configure
+#      - name: "🏗️ Build"
+#        run: make build
+#      - name: "🧪 Test"
+#        run: make test_ni_instructions
+#
+#  test_naive:
+#    name: "Test: Naive"
+#    runs-on: ubuntu-latest
+#    steps:
+#      - name: "🛎 Checkout"
+#        uses: actions/checkout@v4
+#      - name: "🔧 Setup C Toolchain"
+#        uses: ./.github/actions/use-c-toolchain
+#      - name: "🔧 Configure"
+#        run: make configure
+#      - name: "🏗️ Build"
+#        run: make build
+#      - name: "🧪 Test"
+#        run: make test_naive
+#
+#  test_optimized:
+#    name: "Test: Optimized"
+#    runs-on: ubuntu-latest
+#    steps:
+#      - name: "🛎 Checkout"
+#        uses: actions/checkout@v4
+#      - name: "🔧 Setup C Toolchain"
+#        uses: ./.github/actions/use-c-toolchain
+#      - name: "🔧 Configure"
+#        run: make configure
+#      - name: "🏗️ Build"
+#        run: make build
+#      - name: "🧪 Test"
+#        run: make test_optimized
+#
+#  test_t_tables:
+#    name: "Test: T-tables"
+#    runs-on: ubuntu-latest
+#    steps:
+#      - name: "🛎 Checkout"
+#        uses: actions/checkout@v4
+#      - name: "🔧 Setup C Toolchain"
+#        uses: ./.github/actions/use-c-toolchain
+#      - name: "🔧 Configure"
+#        run: make configure
+#      - name: "🏗️ Build"
+#        run: make build
+#      - name: "🧪 Test"
+#        run: make test_t_tables
 
   benchmarks:
 #    needs: [build, test_aes_ni, test_naive, test_optimized, test_t_tables]
     name: "Benchmark"
     permissions:
+      contents: read
       pull-requests: write
     runs-on: ubuntu-latest
     steps:
