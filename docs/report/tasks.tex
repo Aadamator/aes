@@ -33,8 +33,8 @@ The encryption process begins by mapping a 16-byte plaintext array to a $4 \time
 The core of the encryption process is broken into four distinct operations:
 
 \begin{itemize}
-    \item \textbf{add\_round\_key}: Using the round as the index for the pre-computed key schedules, the extracted 16-byte "round key" is transformed into a matrix just as we did with the state. Then a bitwise XOR is applied between the state and this "round key" matrix and the state is then updated with this new transformation. 
-    
+    \item \textbf{add\_round\_key}: Using the round as the index for the pre-computed key schedules, the extracted 16-byte "round key" is transformed into a matrix just as we did with the state. Then a bitwise XOR is applied between the state and this "round key" matrix and the state is then updated with this new transformation.
+
     \begin{figure}[H]
         \centering
         \includegraphics[width=0.7\textwidth]{images/add_round_key.png}
@@ -50,7 +50,7 @@ The core of the encryption process is broken into four distinct operations:
         \caption{SubBytes transformation \cite{sub_bytes_image}.}
         \label{fig:sub_bytes}
     \end{figure}
-    
+
     \item \textbf{shift\_rows}: A transposition step that cyclically shifts the bytes in the last three rows of the state by varying offsets. The first row remains unchanged, while the second, third, and fourth rows are shifted to the left by one, two, and three bytes, respectively.
 
     \begin{figure}[H]
@@ -59,7 +59,7 @@ The core of the encryption process is broken into four distinct operations:
         \caption{ShiftRows transformation \cite{shift_rows_image}.}
         \label{fig:shift_rows}
     \end{figure}
-    
+
     \item \textbf{mix\_columns}: A linear mixing operation where each column of the state is treated as a polynomial over the Galois Field $\text{GF}(2^8)$ and multiplied by a fixed matrix. This step provides critical diffusion to the cipher.
 
     \begin{figure}[H]
@@ -71,7 +71,7 @@ The core of the encryption process is broken into four distinct operations:
 
 \end{itemize}
 
-We start with round 0, which simply applies an initial \texttt{add\_round\_key} operation. 
+We start with round 0, which simply applies an initial \texttt{add\_round\_key} operation.
 
 Following the initial key addition, the state undergoes nine identical ordinary rounds. Each round applies the four transformations mentioned above in the sequence shown in \ref{fig:encryption_round}.
 
@@ -86,11 +86,11 @@ The tenth and final round is slightly different; it applies the normal operation
 
 \subsubsection{Decryption}
 
-Similar to the encryption process, the key schedules are pre-computed and the 16-byte ciphertext is transformed into a $4 \times 4$ state matrix. 
+Similar to the encryption process, the key schedules are pre-computed and the 16-byte ciphertext is transformed into a $4 \times 4$ state matrix.
 
 The decryption process undoes the encryption by applying the inverse of each transformation in reverse order beginning with the initial \texttt{add\_round\_key}, using the final round key of the pre-computed key schedules, followed by \texttt{inverse\_sub\_bytes} and \texttt{inverse\_shift\_rows}.
 
-The state then undergoes nine inverse rounds. Because the operations are applied in reverse, each round consists of the sequence shown in \ref{fig:decryption_round}. 
+The state then undergoes nine inverse rounds. Because the operations are applied in reverse, each round consists of the sequence shown in \ref{fig:decryption_round}.
 
 \begin{figure}[H]
     \centering
@@ -99,7 +99,7 @@ The state then undergoes nine inverse rounds. Because the operations are applied
     \label{fig:decryption_round}
 \end{figure}
 
-Similar to the encryption operation flow, the \texttt{inverse\_mix\_columns} step utilizes matrix multiplication over $\text{GF}(2^8)$, but with a different set of fixed polynomial constants. 
+Similar to the encryption operation flow, the \texttt{inverse\_mix\_columns} step utilizes matrix multiplication over $\text{GF}(2^8)$, but with a different set of fixed polynomial constants.
 
 Finally, a concluding \texttt{add\_round\_key} (much like the round 0 in the encryption process) is applied using the very first key from the key schedule, and then the decrypted state is flattened back into the 16-byte plaintext array. Thus, fully reversing the encryption process.
 
@@ -111,11 +111,11 @@ Up until now, AES has been implemented at the software level as algorithms writt
 
 In C, these hardware instructions are accessed through intrinsics from the \texttt{\textless wmmintrin.h\textgreater} header. This interface allows access to several instructions and types without the need to write the underlying assembly. The interface provides a convenient type \texttt{\_\_m128i}, which represents a 128-bit register, so an entire AES block can be loaded into a single CPU register and processed there rather than repeatedly reading and writing individual bytes in memory.
 
-A major consequence of using AES-NI is that several helper functions from the other implementations, such as \texttt{add\_round\_key}, \texttt{mix\_columns}, \texttt{shift\_rows}, \texttt{inverse\_mix\_columns} and \texttt{inverse\_shift\_rows}, are no longer needed in the encryption/decryption processes, since their work is effectively absorbed into the CPU instructions themselves. 
+A major consequence of using AES-NI is that several helper functions from the other implementations, such as \texttt{add\_round\_key}, \texttt{mix\_columns}, \texttt{shift\_rows}, \texttt{inverse\_mix\_columns} and \texttt{inverse\_shift\_rows}, are no longer needed in the encryption/decryption processes, since their work is effectively absorbed into the CPU instructions themselves.
 
 \subsubsection{Encryption}
 
-First the plaintext block and the first round key are loaded into hardware registers with \texttt{\_mm\_loadu\_si128}, and the initial key addition is performed with \texttt{\_mm\_xor\_si128}. Next, the nine main rounds are handled by \texttt{\_mm\_aesenc\_si128}, which applies the standard round transformation in hardware, and the final round is performed by \texttt{\_mm\_aesenclast\_si128} - a separate instruction because the last AES round, as mentioned before, omits the mix columns step. 
+First the plaintext block and the first round key are loaded into hardware registers with \texttt{\_mm\_loadu\_si128}, and the initial key addition is performed with \texttt{\_mm\_xor\_si128}. Next, the nine main rounds are handled by \texttt{\_mm\_aesenc\_si128}, which applies the standard round transformation in hardware, and the final round is performed by \texttt{\_mm\_aesenclast\_si128} - a separate instruction because the last AES round, as mentioned before, omits the mix columns step.
 
 Once the computation is finished, the resulting ciphertext is copied back to memory using \texttt{\_mm\_storeu\_si128}.
 
@@ -139,7 +139,7 @@ To serve as a baseline for comparison against a production-grade implementation,
     \caption{Benchmark results for the encryption implementations.}
     \label{benchmark_encryption_table}
     \begin{center}
-        \begin{tabular}{|l|c|c|c|} 
+        \begin{tabular}{|l|c|c|c|}
             \hline
                 \textbf{Implementation} &
                 \textbf{Mean Latency} &
@@ -170,7 +170,7 @@ To serve as a baseline for comparison against a production-grade implementation,
                 - ns/op &
                 - ns/op &
                 - \\
-            \hline 
+            \hline
         \end{tabular}
     \end{center}
 \end{table}
@@ -179,7 +179,7 @@ To serve as a baseline for comparison against a production-grade implementation,
     \caption{Benchmark results for the decryption implementations.}
     \label{benchmark_decryption_table}
     \begin{center}
-        \begin{tabular}{|l|c|c|c|} 
+        \begin{tabular}{|l|c|c|c|}
             \hline
                 \textbf{Implementation} &
                 \textbf{Mean Latency} &
@@ -210,7 +210,7 @@ To serve as a baseline for comparison against a production-grade implementation,
                 - ns/op &
                 - ns/op &
                 - \\
-            \hline 
+            \hline
         \end{tabular}
     \end{center}
 \end{table}
