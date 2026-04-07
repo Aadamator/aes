@@ -105,6 +105,8 @@ Finally, a concluding \texttt{add\_round\_key} (much like round 0 in the encrypt
 
 \subsection{Optimized Implementation of AES-128}
 
+\subsection{Implementation of AES-128 using T-tables}
+
 \subsection{Implementation of AES-128 using NI instructions}
 
 Up until now, AES has been implemented at the software level as algorithms written directly in C code. However, Intel introduced an extension instruction set for their x86 architecture known as Advanced Encryption Standard New Instructions (AES-NI). AES-NI allows complex AES operations to be executed directly on the hardware, significantly accelerating the encryption and decryption processes, while also mitigating the risk of side-channel attacks by eliminating the need for software-based lookup tables.
