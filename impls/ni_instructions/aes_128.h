@@ -3,8 +3,8 @@
 #include <stdint.h>
 
 /**
- * @brief Decrypts a single 16-byte block using AES-128, applying the inverse operations of the
- * encryption routine in the opposite order.
+ * @brief Decrypts a single 16-byte block using the NI instructions, applying the inverse operations
+ * of the encryption routine in the opposite order.
  *
  * @param key_schedules List of 16-byte pre-computed key schedules.
  * @param ciphertext    16-byte input block - the encrypted plaintext.
@@ -18,7 +18,7 @@ int decrypt(
 );
 
 /**
- * @brief Encrypts a single 16-byte block using AES-128.
+ * @brief Encrypts a single 16-byte block using the NI instructions.
  *
  * @param key_schedules List of 16-byte pre-computed key schedules.
  * @param plaintext     16-byte input block - the plaintext to encrypt.

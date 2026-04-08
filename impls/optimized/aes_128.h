@@ -11,7 +11,8 @@
 void add_round_key(const uint8_t round_key[16], uint8_t state[4][4]);
 
 /**
- * @brief Decrypts a single 16-byte block using AES-128, applying the inverse operations of the
+ * @brief Decrypts a single 16-byte block using optimizations, applying the inverse operations of
+ * the
  * encryption routine in the opposite order.
  *
  * @param key_schedules List of 16-byte pre-computed key schedules.
@@ -26,7 +27,7 @@ int decrypt(
 );
 
 /**
- * @brief Encrypts a single 16-byte block using AES-128.
+ * @brief Encrypts a single 16-byte block using optimizations.
  *
  * @param key_schedules List of 16-byte pre-computed key schedules.
  * @param plaintext     16-byte input block - the plaintext to encrypt.
