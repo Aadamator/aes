@@ -4,6 +4,7 @@
 #include <windows.h>
 #include <intrin.h>
 
+//
 static const uint8_t sbox[256] = {
     0x63, 0x7c, 0x77, 0x7b, 0xf2, 0x6b, 0x6f, 0xc5, 0x30, 0x01, 0x67, 0x2b, 0xfe, 0xd7, 0xab, 0x76,
     0xca, 0x82, 0xc9, 0x7d, 0xfa, 0x59, 0x47, 0xf0, 0xad, 0xd4, 0xa2, 0xaf, 0x9c, 0xa4, 0x72, 0xc0,
@@ -265,6 +266,46 @@ void benchmarkCycles(uint8_t state[4][4], uint8_t roundKeys[11][4][4]) {
     printf("Cycles per byte (CpB): %.2f\n", (double)(totalCycles / iterations) / 16);
 }
 
+// --- REPLACED TIMING LOGIC (Martin Style) ---
+#ifdef _WIN32
+    #include <windows.h>
+    typedef LARGE_INTEGER timer_t;
+    void get_time(timer_t* t) { QueryPerformanceCounter(t); }
+    double get_elapsed_ms(timer_t start, timer_t end) {
+        LARGE_INTEGER freq;
+        QueryPerformanceFrequency(&freq);
+        return (double)(end.QuadPart - start.QuadPart) * 1000.0 / freq.QuadPart;
+    }
+#else
+    #include <time.h>
+    typedef struct timespec timer_t;
+    void get_time(timer_t* t) { clock_gettime(CLOCK_MONOTONIC_RAW, t); }
+    double get_elapsed_ms(timer_t start, timer_t end) {
+        return (double)(end.tv_sec - start.tv_sec) * 1000.0 + (double)(end.tv_nsec - start.tv_nsec) / 1000000.0;
+    }
+#endif
+
+void benchmark_nanoseconds(uint8_t plaintext[16], uint8_t roundKeys[11][4][4]) {
+    timer_t start, end;
+    uint8_t state[4][4];
+    int iterations = 1000000;
+
+    printf("Starting Naive Benchmark (%d iterations)...\n", iterations);
+
+    get_time(&start);
+    for (int i = 0; i < iterations; i++) {
+        loadState(state, plaintext);
+        encrypt(state, roundKeys);
+    }
+    get_time(&end);
+
+    double total_ms = get_elapsed_ms(start, end);
+    
+    printf("Total Time: %.2f ms\n", total_ms);
+    // (ms * 1,000,000) converts to nanoseconds
+    printf("Average per block: %.2f ns\n", (total_ms * 1000000.0) / iterations);
+}
+
 int main(){
 
     printf("AES-128 Encryption\n");
@@ -347,9 +388,11 @@ int main(){
 
     //benchmark(plaintext, roundKeys);
 
-    loadState(state, plaintext);
+    //loadState(state, plaintext);
 
     //benchmarkCycles(state, roundKeys);
+
+    benchmark_nanoseconds(plaintext, roundKeys);
 
     encrypt(state, roundKeys);    
     decrypt(state, roundKeys);
