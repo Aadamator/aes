@@ -1,3 +1,4 @@
+#include <stdint.h>
 #include <string.h>
 
 #include "sodium.h"
@@ -7,7 +8,6 @@
 #include "keys.h"
 #include "matrix.h"
 #include "s_box.h"
-#include "../../utilities/assertations.h"
 #include "../../utilities/constants.h"
 
 /**

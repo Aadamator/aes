@@ -1,5 +1,5 @@
 function(add_aes_test test_name
-    implementation_source
+    implementation_source_alias
     test_source
 )
     file(GLOB
@@ -21,7 +21,7 @@ function(add_aes_test test_name
     # link the specific implementation and libraries
     target_link_libraries(${test_name}
         PRIVATE
-        ${implementation_source}
+        ${implementation_source_alias}
         aes_lib
         sodium
         unity

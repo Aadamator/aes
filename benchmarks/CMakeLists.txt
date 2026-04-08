@@ -8,7 +8,7 @@ file(GLOB
 
 function(add_aes_benchmark benchmark_name
     implementation_name
-    implementation_source
+    implementation_source_alias
     benchmark_source
 )
     # create the c++ executable
@@ -25,7 +25,7 @@ function(add_aes_benchmark benchmark_name
     # link the specific implementation and libraries
     target_link_libraries(${benchmark_name}
         PRIVATE
-        ${implementation_source}
+        ${implementation_source_alias}
         aes_lib
         benchmark::benchmark
         benchmark::benchmark_main
