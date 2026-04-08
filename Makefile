@@ -51,7 +51,7 @@ benchmark_encrypt: benchmark_library_encrypt \
 $(BENCHMARK_TARGETS): benchmark_%:
 	@echo ">>> Running $* benchmark"
 	@cmake -E make_directory .benchmarks
-	@./$(BUILD_DIR)/benchmarks/$*_benchmark \
+	@./$(BUILD_DIR)/benchmarks/benchmark_$* \
        --benchmark_display_aggregates_only=true \
        --benchmark_out=./.benchmarks/$*_benchmark.json \
        --benchmark_out_format=json > /dev/null 2>&1

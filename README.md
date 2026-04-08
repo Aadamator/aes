@@ -47,53 +47,53 @@ This repo uses a pseudo-monorepo structure:
 ```text
 .
 ├─ benchmarks/
-│   ├── utilities/              <-- Utility functions and constants to aid in the benchmarking.
+│   ├─ impls/
+│   ├── <aes_implementation>/
+│   │   ├── benchmark_decrypt.cpp   <-- Benchmark the AES-128 decryption implementation.
+│   │   ├── benchmark_encrypt.cpp   <-- Benchmark the AES-128 encryption implementation.
 │   │   └── ...
-│   ├── CMakeLists.txt          <-- Defines test executables and links libraries.
-│   ├── decrypt.cpp             <-- Benchmarks an AES-128 decryption implementation.
-│   ├── encrypt.cpp             <-- Benchmarks an AES-128 encryption implementation.
-│   ├── library_decrypt.cpp     <-- Benchmarks a third-party library AES-128 decryption implementation.
-│   ├── library_encrypt.cpp     <-- Benchmarks a third-party library AES-128 encryption implementation.
-│   ├── reporter.py             <-- Script used to aggregate the benchmarks into a JSON report.
+│   ├── utilities/                  <-- Utility functions and constants to aid in the benchmarking.
+│   │   └── ...
+│   ├── CMakeLists.txt              <-- Defines test executables and links libraries.
+│   ├── reporter.py                 <-- Script used to aggregate the benchmarks into a JSON report.
 │   └── ...
 ├─ docs/
-│   ├── report/                 <-- LaTeX source files for the report.
+│   ├── report/                     <-- LaTeX source files for the report.
 │   │   ├── main.tex
 │   │   └── ...
 │   └── ...
 ├─ impls/
 │   ├── <aes_implementation>/
-│   │   ├── aes_128.c           <-- The AES-128 implementation.
-│   │   ├── CMakeLists.txt      <-- Links common header library and declares implementation alias.
-│   │   └── ...
-│   └── ...
-├─ include/
-│   ├── common/
-│   │   ├── aes_128.h           <-- Common header interface used across each implementation.
-│   │   ├── CMakeLists.txt      <-- Header declarations.
+│   │   ├── aes_128.h
+│   │   ├── aes_128.c               <-- The AES-128 implementation.
+│   │   ├── CMakeLists.txt          <-- Links common header libraries and declares implementation alias.
 │   │   └── ...
 │   └── ...
 ├─ lib/
 │   ├── gf.h
-│   ├── gf.c                    <-- Utility functions related to Galois field arithmetic.
+│   ├── gf.c                        <-- Utility functions related to Galois field arithmetic.
+│   ├── keys.h
+│   ├── keys.c                      <-- Utility functions used in key schedule pre-computation.
 │   ├── matrix.h
-│   ├── matrix.c                <-- Utility functions used in matrix state manipulation.
+│   ├── matrix.c                    <-- Utility functions used in matrix state manipulation.
 │   ├── s_box.h
-│   ├── s_box.c                 <-- Utility functions and constants related to the S-box look-up table.
-│   ├── CMakeLists.txt          <-- Header declarations and public linking.
+│   ├── s_box.c                     <-- Utility functions and constants related to the S-box look-up table.
+│   ├── CMakeLists.txt              <-- Header declarations and public linking.
 │   └── ...
 ├─ tests/
-│   ├── utilities/              <-- Utility functions and constants to aid in the tests.
+│   ├─ impls/
+│   ├── <aes_implementation>/
+│   │   ├── test_decrypt.cpp        <-- End-to-end and unt tests for AES-128 decryption implementation.
+│   │   ├── test_encrypt.cpp        <-- End-to-end and unt tests for AES-128 encryption implementation.
 │   │   └── ...
-│   ├── test_decrypt.c          <-- End-to-end tests for AES-128 decryption implementation(s).
-│   ├── test_encrypt.c          <-- End-to-end tests for AES-128 encryption implementation(s).
-│   ├── test_encrypt_rounds.c   <-- Unit tests for per round iteration.
-│   ├── CMakeLists.txt          <-- Defines test executables and registers them with CTest.
+│   ├── utilities/                  <-- Utility functions and constants to aid in the tests.
+│   │   └── ...
+│   ├── CMakeLists.txt              <-- Defines test executables and registers them with CTest.
 │   └── ...
-├── .editorconfig               <-- Editor configuration file.
-├── CMakeLists.txt              <-- Root-level build entrypoint: defines the project, fetches dependencies, and wires up subdirectories.
+├── .editorconfig                   <-- Editor configuration file.
+├── CMakeLists.txt                  <-- Root-level build entrypoint: defines the project, fetches dependencies, and wires up subdirectories.
 ├── LICENSE
-├── Makefile                    <-- Root-level scripts
+├── Makefile                        <-- Root-level scripts
 ├── README.md
 └── ...
 ```
@@ -181,7 +181,7 @@ The third-party implementation is used to compare the performance of the AES imp
 
 2. Each benchmark is run separately from their corresponding built executable, replacing `<ni_instructions|naive|optimized|t_tables>` with the name of the implementation to benchmark and `<decrypt|encrypt>` with the type of benchmark to run:
 ```shell
-./build/benchmarks/<ni_instructions|naive|optimized|t_tables>_<decrypt|encrypt>_benchmark \
+./build/benchmarks/benchmark_<ni_instructions|naive|optimized|t_tables>_<decrypt|encrypt> \
 		--benchmark_display_aggregates_only=true \
 		--benchmark_out=./.benchmarks/<ni_instructions|naive|optimized|t_tables>_<decrypt|encrypt>.json \
 		--benchmark_out_format=json

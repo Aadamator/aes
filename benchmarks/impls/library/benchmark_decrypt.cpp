@@ -2,10 +2,10 @@
 #include <mbedtls/aes.h>
 #include <string.h>
 
-#include "utilities/constants.h"
-#include "utilities/hex.h"
+#include "../../utilities/constants.h"
+#include "../../utilities/hex.h"
 
-static void BMLibraryDecrypt(benchmark::State& state) {
+static void BMDecrypt(benchmark::State& state) {
   mbedtls_aes_context aes;
   uint8_t ciphertext[16];
   uint8_t key[16];
@@ -31,4 +31,4 @@ static void BMLibraryDecrypt(benchmark::State& state) {
   mbedtls_aes_free(&aes);
 }
 
-BENCHMARK(BMLibraryDecrypt)->Iterations(iterations)->Repetitions(repetitions)->Name(AES_LIBRARY_NAME);
+BENCHMARK(BMDecrypt)->Iterations(iterations)->Repetitions(repetitions)->Name(IMPLEMENTATION_NAME);
