@@ -1,7 +1,8 @@
 #include <stdint.h>
+
 #include "aes_128.h"
 
-void add_round_key(const uint8_t round_key[16], uint8_t state[16]) {}
+void add_round_key(const uint8_t round_key[16], uint8_t state[4][4]) {}
 
 int decrypt(const uint8_t key_schedules[11][16], const uint8_t ciphertext[16], uint8_t plaintext[16]) {
     // placeholder, just returns the cipertext
@@ -17,12 +18,10 @@ int encrypt(const uint8_t key_schedules[11][16], const uint8_t plaintext[16], ui
     return 0;
 }
 
-void inverse_mix_columns(uint8_t state[16]) {}
+void inverse_mix_columns(uint8_t state[4][4]) {}
 
-void inverse_shift_rows(uint8_t state[16]) {}
+void inverse_shift_rows(uint8_t state[4][4]) {}
 
-void key_expansion(const uint8_t cipherkey[16], uint8_t key_schedules[11][16]) {}
+void mix_columns(uint8_t state[4][4]) {}
 
-void mix_columns(uint8_t state[16]) {}
-
-void shift_rows(uint8_t state[16]) {}
+void shift_rows(uint8_t state[4][4]) {}

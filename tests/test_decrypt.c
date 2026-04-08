@@ -38,9 +38,9 @@ static void test_decrypt(void) {
         NULL, NULL, NULL);
 
     // pre-compute the round keys
-    key_expansion(key, key_schedules);
+    key_expansion(key, &key_schedules);
 
-    decrypt(key_schedules, ciphertext, plaintext);
+    decrypt(key_schedules, ciphertext, &plaintext);
 
     TEST_ASSERT_EQUAL_UINT8_ARRAY(expected_plaintext, plaintext, 16);
 }

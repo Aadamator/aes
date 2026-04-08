@@ -64,7 +64,7 @@ This repo uses a pseudo-monorepo structure:
 ├─ impls/
 │   ├── <aes_implementation>/
 │   │   ├── aes_128.c           <-- The AES-128 implementation.
-│   │   ├── CMakeLists.txt      <-- Links common header library and declares alias.
+│   │   ├── CMakeLists.txt      <-- Links common header library and declares implementation alias.
 │   │   └── ...
 │   └── ...
 ├─ include/
@@ -74,15 +74,12 @@ This repo uses a pseudo-monorepo structure:
 │   │   └── ...
 │   └── ...
 ├─ lib/
-│   ├── constants.h
-│   ├── constants.c             <-- Common constants used across each implementation.
 │   ├── gf.h
 │   ├── gf.c                    <-- Utility functions related to Galois field arithmetic.
+│   ├── matrix.h
+│   ├── matrix.c                <-- Utility functions used in matrix state manipulation.
 │   ├── s_box.h
-│   ├── s_box.c                 <-- Utility functions and constants related to the S-box look-up
-table.
-│   ├── state_utils.h
-│   ├── state_utils.c           <-- Utility functions used in state manipulation, e.g. mapping matrices.
+│   ├── s_box.c                 <-- Utility functions and constants related to the S-box look-up table.
 │   ├── CMakeLists.txt          <-- Header declarations and public linking.
 │   └── ...
 ├─ tests/
@@ -225,12 +222,12 @@ The script will generate the aggregated report to `.benchmarks/aggregated_benchm
 
 ### 4.1. Implementations
 
-| Name                                                   | Description                                         |
-|--------------------------------------------------------|-----------------------------------------------------|
-| [`naive`](./impls/naive/aes_128.c)                     | A naive implementation of AES-128.                  |
-| [`optimized`](./impls/optimized/aes_128.c)             | An optimized version of the naive implementation.   |
-| [`t_tables`](./impls/t_tables/aes_128.c)               | The optimized implementation using T-tables.        |
-| [`ni_instructions`](./impls/ni_instructions/aes_128.c) | The optimized implementation using NI instructions. |
+| Name                                                   | Description                                       |
+|--------------------------------------------------------|---------------------------------------------------|
+| [`naive`](./impls/naive/aes_128.c)                     | A naive implementation of AES-128.                |
+| [`optimized`](./impls/optimized/aes_128.c)             | An optimized version of the naive implementation. |
+| [`t_tables`](./impls/t_tables/aes_128.c)               | The optimized implementation using T-tables.      |
+| [`ni_instructions`](./impls/ni_instructions/aes_128.c) | The implementation using NI instructions.         |
 
 ### 4.2. Useful commands
 

@@ -12,7 +12,7 @@ extern "C" {
 static void BMDecrypt(benchmark::State& state) {
   uint8_t ciphertext[16];
   uint8_t key[16];
-  uint8_t key_schedules[11][16];
+  uint8_t key_schedules[11][16] = {0};
   uint8_t plaintext[16] = {0};
 
   hex_to_bytes(key_as_hex, key);

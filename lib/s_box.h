@@ -8,13 +8,13 @@ extern const uint8_t s_box[256];
 /**
  * @brief Inverse of the sub bytes operation.
  *
- * @param state         16-byte current ciphertext.
+ * @param state         4x4 matrix representing the current state of the 16-byte ciphertext.
  */
-void inverse_sub_bytes(uint8_t state[16]);
+void inverse_sub_bytes(uint8_t state[4][4]);
 
 /**
  * @brief Substitute each byte of the state with another byte according to a lookup table.
  *
- * @param state         16-byte current ciphertext.
+ * @param state         4x4 matrix representing the current state of the 16-byte ciphertext.
  */
-void sub_bytes(uint8_t state[16]);
+void sub_bytes(uint8_t state[4][4]);
