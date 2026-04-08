@@ -3,9 +3,9 @@
 #include "sodium.h"
 #include "unity.h"
 
-#include "aes_128.h"
+#include "impls/t_tables/aes_128.h"
 #include "keys.h"
-#include "utilities/constants.h"
+#include "../../utilities/constants.h"
 
 /**
  * Test the full end-to-end functionality of AES-128 implementation using known ciphertext ->
@@ -38,9 +38,9 @@ static void test_decrypt(void) {
         NULL, NULL, NULL);
 
     // pre-compute the round keys
-    key_expansion(key, &key_schedules);
+    key_expansion(key, key_schedules);
 
-    decrypt(key_schedules, ciphertext, &plaintext);
+    decrypt(key_schedules, ciphertext, plaintext);
 
     TEST_ASSERT_EQUAL_UINT8_ARRAY(expected_plaintext, plaintext, 16);
 }
