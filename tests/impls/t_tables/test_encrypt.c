@@ -5,9 +5,6 @@
 #include "unity.h"
 
 #include "impls/t_tables/aes_128.h"
-#include "keys.h"
-#include "matrix.h"
-#include "s_box.h"
 #include "../../utilities/constants.h"
 
 /**
@@ -18,8 +15,9 @@ static void test_encrypt(void) {
     uint8_t expected_ciphertext[16] = {0};
     uint8_t ciphertext[16] = {0};
     uint8_t key[16] = {0};
-    uint8_t key_schedules[11][16] = {0}; // 16 bytes * 11 (0-10)
+    uint32_t key_schedules[44] = {0};
     uint8_t plaintext[16] = {0};
+    uint32_t t_tables[4][256] = {0};
 
     sodium_hex2bin(
         expected_ciphertext,
@@ -40,10 +38,11 @@ static void test_encrypt(void) {
         strlen(plaintext_as_hex),
         NULL, NULL, NULL);
 
-    // pre-compute the round keys
-    key_expansion(key, key_schedules);
+    // pre-compute the round keys and t-tables
+    key_schedule(key, key_schedules);
+    generate_tables(t_tables);
 
-    encrypt(key_schedules, plaintext, ciphertext);
+    encrypt(key_schedules, t_tables, plaintext, ciphertext);
 
     TEST_ASSERT_EQUAL_UINT8_ARRAY(expected_ciphertext, ciphertext, 16);
 }
