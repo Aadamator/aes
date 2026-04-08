@@ -63,7 +63,7 @@ add_subdirectory(include/common)
 add_subdirectory(impls/naive)
 add_subdirectory(impls/optimized)
 add_subdirectory(impls/t_tables)
-add_subdirectory(impls/aes_ni)
+add_subdirectory(impls/ni_instructions)
 
 # testing directory
 add_subdirectory(tests)

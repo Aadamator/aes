@@ -2,12 +2,12 @@ BUILD_DIR ?= build
 CMAKE ?= cmake
 CTEST ?= ctest
 BENCHMARK_TARGETS := \
-    benchmark_aes_ni_decrypt \
-    benchmark_aes_ni_encrypt \
     benchmark_library_decrypt \
     benchmark_library_encrypt \
     benchmark_naive_decrypt \
     benchmark_naive_encrypt \
+    benchmark_ni_instructions_decrypt \
+    benchmark_ni_instructions_encrypt \
     benchmark_optimized_decrypt \
     benchmark_optimized_encrypt \
     benchmark_t_tables_decrypt \
@@ -21,8 +21,8 @@ BENCHMARK_TARGETS := \
     clean \
     configure \
     test \
-    test_aes_ni \
     test_naive \
+    test_ni_instructions \
     test_optimized \
     test_t_tables \
     update
@@ -36,15 +36,15 @@ all: configure build
 benchmark: benchmark_decrypt \
 	benchmark_encrypt
 
-benchmark_decrypt: benchmark_aes_ni_decrypt \
-	benchmark_library_decrypt \
+benchmark_decrypt: benchmark_library_decrypt \
 	benchmark_naive_decrypt \
+	benchmark_ni_instructions_decrypt \
 	benchmark_optimized_decrypt \
 	benchmark_t_tables_decrypt
 
-benchmark_encrypt: benchmark_aes_ni_encrypt \
-	benchmark_library_encrypt \
+benchmark_encrypt: benchmark_library_encrypt \
 	benchmark_naive_encrypt \
+	benchmark_ni_instructions_encrypt \
 	benchmark_optimized_encrypt \
 	benchmark_t_tables_encrypt
 
@@ -54,8 +54,7 @@ $(BENCHMARK_TARGETS): benchmark_%:
 	@./$(BUILD_DIR)/benchmarks/$*_benchmark \
        --benchmark_display_aggregates_only=true \
        --benchmark_out=./.benchmarks/$*_benchmark.json \
-       --benchmark_out_format=json \
-       --benchmark_repetitions=30 > /dev/null 2>&1
+       --benchmark_out_format=json > /dev/null 2>&1
 	@echo ">>> Finished $* benchmark"
 
 benchmark_report:
@@ -89,18 +88,19 @@ test:
 	@echo ">>> Running all unit tests"
 	$(CTEST) --test-dir $(BUILD_DIR) --output-on-failure
 
-test_aes_ni:
-	@echo ">>> Running AES-NI implementation unit tests"
-	$(CTEST) --test-dir $(BUILD_DIR) -R "aes_ni_(decrypt|encrypt)_tests" --output-on-failure
-
 test_naive:
 	@echo ">>> Running naive implementation unit tests"
-	$(CTEST) --test-dir $(BUILD_DIR) -R "naive_(decrypt|encrypt)_tests" --output-on-failure
+	$(CTEST) --test-dir $(BUILD_DIR) -R "test_naive" --output-on-failure
+
+test_ni_instructions:
+	@echo ">>> Running NI instructions implementation unit tests"
+	$(CTEST) --test-dir $(BUILD_DIR) -R "test_ni_instructions"
+	--output-on-failure
 
 test_optimized:
 	@echo ">>> Running optimized implementation unit tests"
-	$(CTEST) --test-dir $(BUILD_DIR) -R "optimized_(decrypt|encrypt)_tests" --output-on-failure
+	$(CTEST) --test-dir $(BUILD_DIR) -R "test_optimized" --output-on-failure
 
 test_t_tables:
 	@echo ">>> Running T-tables implementation unit tests"
-	$(CTEST) --test-dir $(BUILD_DIR) -R "t_tables_(decrypt|encrypt)_tests" --output-on-failure
+	$(CTEST) --test-dir $(BUILD_DIR) -R "test_t_tables" --output-on-failure
