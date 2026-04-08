@@ -1,37 +1,75 @@
-function(add_aes_test test_name aes_implementation_name test_source)
+function(add_aes_test test_name
+    implementation_source_alias
+    test_source
+)
     file(GLOB
         TEST_UTILITY_SOURCES
         "${CMAKE_CURRENT_SOURCE_DIR}/utilities/*.c"
     )
 
     # create the C executable
-    add_executable(${test_name} ${test_source} ${TEST_UTILITY_SOURCES})
+    add_executable(${test_name}
+        ${test_source}
+        ${TEST_UTILITY_SOURCES}
+    )
+
+    target_include_directories(${test_name}
+        PRIVATE
+        ${CMAKE_SOURCE_DIR}
+    )
 
     # link the specific implementation and libraries
     target_link_libraries(${test_name}
         PRIVATE
-        aes_128_interface           # shared header
-        ${aes_implementation_name}
+        ${implementation_source_alias}
+        aes_lib
         sodium
         unity
     )
 
     # add test
-    add_test(NAME ${test_name} COMMAND ${test_name})
+    add_test(NAME ${test_name}
+        COMMAND
+        ${test_name}
+    )
 endfunction()
 
-# aes_ni tests
-add_aes_test(aes_ni_decrypt_tests aes_128_ni decrypt.c)
-add_aes_test(aes_ni_encrypt_tests aes_128_ni encrypt.c)
-
 # naive tests
-add_aes_test(naive_decrypt_tests aes_128_naive decrypt.c)
-add_aes_test(naive_encrypt_tests aes_128_naive encrypt.c)
+add_aes_test(test_naive_decrypt
+    aes_128_naive
+    impls/naive/test_decrypt.c
+)
+add_aes_test(test_naive_encrypt
+    aes_128_naive
+    impls/naive/test_encrypt.c
+)
+
+# ni_instructions tests
+add_aes_test(test_ni_instructions_decrypt
+    aes_128_ni_instructions
+    impls/ni_instructions/test_decrypt.c
+)
+add_aes_test(test_ni_instructions_encrypt
+    aes_128_ni_instructions
+    impls/ni_instructions/test_encrypt.c
+)
 
 # optimized tests
-add_aes_test(optimized_decrypt_tests aes_128_optimized decrypt.c)
-add_aes_test(optimized_encrypt_tests aes_128_optimized encrypt.c)
+add_aes_test(test_optimized_decrypt
+    aes_128_optimized
+    impls/optimized/test_decrypt.c
+)
+add_aes_test(test_optimized_encrypt
+    aes_128_optimized
+    impls/optimized/test_encrypt.c
+)
 
 # t_tables tests
-add_aes_test(t_tables_decrypt_tests aes_128_t_tables decrypt.c)
-add_aes_test(t_tables_encrypt_tests aes_128_t_tables encrypt.c)
+add_aes_test(test_t_tables_decrypt
+    aes_128_t_tables
+    impls/t_tables/test_decrypt.c
+)
+add_aes_test(test_t_tables_encrypt
+    aes_128_t_tables
+    impls/t_tables/test_encrypt.c
+)
