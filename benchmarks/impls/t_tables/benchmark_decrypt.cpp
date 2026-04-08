@@ -1,11 +1,11 @@
 #include <benchmark/benchmark.h>
 #include <string.h>
 
-#include "utilities/constants.h"
-#include "utilities/hex.h"
+#include "../../utilities/constants.h"
+#include "../../utilities/hex.h"
 
 extern "C" {
-  #include "aes_128.h"
+  #include "impls/t_tables/aes_128.h"
   #include "keys.h"
 }
 
@@ -29,4 +29,4 @@ static void BMDecrypt(benchmark::State& state) {
   }
 }
 
-BENCHMARK(BMDecrypt)->Iterations(iterations)->Repetitions(repetitions)->Name(AES_IMPLEMENTATION_NAME);
+BENCHMARK(BMDecrypt)->Iterations(iterations)->Repetitions(repetitions)->Name(IMPLEMENTATION_NAME);

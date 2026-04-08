@@ -6,15 +6,26 @@ file(GLOB
     "${CMAKE_CURRENT_SOURCE_DIR}/utilities/*.cpp"
 )
 
-function(add_aes_benchmark benchmark_name aes_implementation name benchmark_source)
+function(add_aes_benchmark benchmark_name
+    implementation_name
+    implementation_source_alias
+    benchmark_source
+)
     # create the c++ executable
-    add_executable(${benchmark_name} ${benchmark_source} ${BENCHMARK_UTILITY_SOURCES})
+    add_executable(${benchmark_name}
+        ${benchmark_source}
+        ${BENCHMARK_UTILITY_SOURCES}
+    )
+
+    target_include_directories(${benchmark_name}
+        PRIVATE
+        ${CMAKE_SOURCE_DIR}
+    )
 
     # link the specific implementation and libraries
     target_link_libraries(${benchmark_name}
         PRIVATE
-        aes_128_interface           # shared header
-        ${aes_implementation}
+        ${implementation_source_alias}
         aes_lib
         benchmark::benchmark
         benchmark::benchmark_main
@@ -23,19 +34,21 @@ function(add_aes_benchmark benchmark_name aes_implementation name benchmark_sour
     # pass the implementation name to C++
     target_compile_definitions(${benchmark_name}
         PRIVATE
-        AES_IMPLEMENTATION_NAME="${name}"
+        IMPLEMENTATION_NAME="${implementation_name}"
     )
 endfunction()
 
-function(add_library_benchmark direction)
-    # create the C++ executable
-    add_executable(library_${direction}_benchmark
-        library_${direction}.cpp
+function(add_library_benchmark
+    direction
+)
+    # create the c++ executable
+    add_executable(benchmark_library_${direction}
+        impls/library/benchmark_${direction}.cpp
         ${BENCHMARK_UTILITY_SOURCES}
     )
 
     # link libraries
-    target_link_libraries(library_${direction}_benchmark
+    target_link_libraries(benchmark_library_${direction}
         PRIVATE
         benchmark::benchmark
         benchmark::benchmark_main
@@ -43,29 +56,59 @@ function(add_library_benchmark direction)
     )
 
     # pass the library name to C++
-    target_compile_definitions(library_${direction}_benchmark
+    target_compile_definitions(benchmark_library_${direction}
         PRIVATE
-        "AES_LIBRARY_NAME=\"Library (Mbed-TLS)\""
+        "IMPLEMENTATION_NAME=\"Library (Mbed-TLS)\""
     )
 endfunction()
 
 # naive benchmarks
-add_aes_benchmark(naive_encrypt_benchmark aes_128_naive "Naive" encrypt.cpp)
-add_aes_benchmark(naive_decrypt_benchmark aes_128_naive "Naive" decrypt.cpp)
+add_aes_benchmark(benchmark_naive_encrypt
+    "Naive"
+    aes_128_naive
+    impls/naive/benchmark_encrypt.cpp
+)
+add_aes_benchmark(benchmark_naive_decrypt
+    "Naive"
+    aes_128_naive
+    impls/naive/benchmark_decrypt.cpp
+)
 
 # ni_instructions benchmarks
-add_aes_benchmark(ni_instructions_encrypt_benchmark aes_128_ni_instructions "NI Instructions"
-        encrypt.cpp)
-add_aes_benchmark(ni_instructions_decrypt_benchmark aes_128_ni_instructions "NI Instructions"
-        decrypt.cpp)
+add_aes_benchmark(benchmark_ni_instructions_encrypt
+    "NI Instructions"
+    aes_128_ni_instructions
+    impls/ni_instructions/benchmark_encrypt.cpp
+)
+add_aes_benchmark(benchmark_ni_instructions_decrypt
+    "NI Instructions"
+    aes_128_ni_instructions
+    impls/ni_instructions/benchmark_decrypt.cpp
+)
 
 # optimized benchmarks
-add_aes_benchmark(optimized_encrypt_benchmark aes_128_optimized "Optimized" encrypt.cpp)
-add_aes_benchmark(optimized_decrypt_benchmark aes_128_optimized "Optimized" decrypt.cpp)
+add_aes_benchmark(benchmark_optimized_encrypt
+    "Optimized"
+    aes_128_optimized
+    impls/optimized/benchmark_encrypt.cpp
+)
+add_aes_benchmark(benchmark_optimized_decrypt
+    "Optimized"
+    aes_128_optimized
+    impls/optimized/benchmark_decrypt.cpp
+)
 
 # t_tables benchmarks
-add_aes_benchmark(t_tables_encrypt_benchmark aes_128_t_tables "T-tables" encrypt.cpp)
-add_aes_benchmark(t_tables_decrypt_benchmark aes_128_t_tables "T-tables" decrypt.cpp)
+add_aes_benchmark(benchmark_t_tables_encrypt
+    "T-tables"
+    aes_128_t_tables
+    impls/t_tables/benchmark_encrypt.cpp
+)
+add_aes_benchmark(benchmark_t_tables_decrypt
+    "T-tables"
+    aes_128_t_tables
+    impls/t_tables/benchmark_decrypt.cpp
+)
 
 # third party library benchmarks
 add_library_benchmark(encrypt)

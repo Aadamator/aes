@@ -59,7 +59,6 @@ enable_testing()
 
 # source directories
 add_subdirectory(lib)
-add_subdirectory(include/common)
 add_subdirectory(impls/naive)
 add_subdirectory(impls/optimized)
 add_subdirectory(impls/t_tables)
