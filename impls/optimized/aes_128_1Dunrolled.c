@@ -61,6 +61,7 @@ static const uint8_t INV_SBOX[256] = {
     0x17, 0x2b, 0x04, 0x7e, 0xba, 0x77, 0xd6, 0x26, 0xe1, 0x69, 0x14, 0x63, 0x55, 0x21, 0x0c, 0x7d
 };
 
+// xtime function: Perform multiplipilcation in GF(2^8)
 static inline uint8_t xtime(uint8_t x) {
     return (x << 1) ^ (((x >> 7) & 1) * 0x1b);
 }
@@ -71,7 +72,8 @@ static inline uint8_t mul11(uint8_t x) { return xtime(xtime(xtime(x))) ^ xtime(x
 static inline uint8_t mul13(uint8_t x) { return xtime(xtime(xtime(x))) ^ xtime(xtime(x)) ^ x; }
 static inline uint8_t mul14(uint8_t x) { return xtime(xtime(xtime(x))) ^ xtime(xtime(x)) ^ xtime(x); }
 
-// --- Optimized Components ---
+
+// SubBytes transformation: Each byte is replaced by its corresponding value in the S-box
 void sub_bytes_unrolled(uint8_t state[16]) {
     state[0] = SBOX[state[0]];   state[1] = SBOX[state[1]];   state[2] = SBOX[state[2]];   state[3] = SBOX[state[3]];
     state[4] = SBOX[state[4]];   state[5] = SBOX[state[5]];   state[6] = SBOX[state[6]];   state[7] = SBOX[state[7]];
@@ -79,6 +81,7 @@ void sub_bytes_unrolled(uint8_t state[16]) {
     state[12] = SBOX[state[12]]; state[13] = SBOX[state[13]]; state[14] = SBOX[state[14]]; state[15] = SBOX[state[15]];
 }
 
+// Inverse SubBytes transformation: Each byte is replaced by its corresponding value in the inverse S-box
 void inv_sub_bytes_unrolled(uint8_t state[16]) {
     state[0] = INV_SBOX[state[0]];   state[1] = INV_SBOX[state[1]];   state[2] = INV_SBOX[state[2]];   state[3] = INV_SBOX[state[3]];
     state[4] = INV_SBOX[state[4]];   state[5] = INV_SBOX[state[5]];   state[6] = INV_SBOX[state[6]];   state[7] = INV_SBOX[state[7]];
@@ -86,6 +89,8 @@ void inv_sub_bytes_unrolled(uint8_t state[16]) {
     state[12] = INV_SBOX[state[12]]; state[13] = INV_SBOX[state[13]]; state[14] = INV_SBOX[state[14]]; state[15] = INV_SBOX[state[15]];
 }
 
+
+// ShiftRows transformation: Each row is shifted to the left by its row index
 void shift_rows_unrolled(uint8_t state[16]) {
     uint8_t tmp;
     tmp = state[1]; state[1] = state[5]; state[5] = state[9]; state[9] = state[13]; state[13] = tmp;
@@ -94,6 +99,7 @@ void shift_rows_unrolled(uint8_t state[16]) {
     tmp = state[3]; state[3] = state[15]; state[15] = state[11]; state[11] = state[7]; state[7] = tmp;
 }
 
+// Inverse ShiftRows transformation: Each row is shifted to the right by its row index
 void inv_shift_rows_unrolled(uint8_t state[16]) {
     uint8_t tmp;
     tmp = state[13]; state[13] = state[9]; state[9] = state[5]; state[5] = state[1]; state[1] = tmp;
@@ -102,33 +108,91 @@ void inv_shift_rows_unrolled(uint8_t state[16]) {
     tmp = state[3]; state[3] = state[7]; state[7] = state[11]; state[11] = state[15]; state[15] = tmp;
 }
 
+// MixColumns transformation: Each column is mixed using a specific transformation
 void mix_columns_unrolled(uint8_t state[16]) {
     uint8_t a, b, c, d;
-    for(int i=0; i<16; i+=4) {
-        a = state[i]; b = state[i+1]; c = state[i+2]; d = state[i+3];
-        state[i]   = xtime(a) ^ (xtime(b) ^ b) ^ c ^ d;
-        state[i+1] = a ^ xtime(b) ^ (xtime(c) ^ c) ^ d;
-        state[i+2] = a ^ b ^ xtime(c) ^ (xtime(d) ^ d);
-        state[i+3] = (xtime(a) ^ a) ^ b ^ c ^ xtime(d);
-    }
+
+    // Column 0 (Indices 0, 1, 2, 3)
+    a = state[0]; b = state[1]; c = state[2]; d = state[3];
+    state[0] = xtime(a) ^ (xtime(b) ^ b) ^ c ^ d;
+    state[1] = a ^ xtime(b) ^ (xtime(c) ^ c) ^ d;
+    state[2] = a ^ b ^ xtime(c) ^ (xtime(d) ^ d);
+    state[3] = (xtime(a) ^ a) ^ b ^ c ^ xtime(d);
+
+    // Column 1 (Indices 4, 5, 6, 7)
+    a = state[4]; b = state[5]; c = state[6]; d = state[7];
+    state[4] = xtime(a) ^ (xtime(b) ^ b) ^ c ^ d;
+    state[5] = a ^ xtime(b) ^ (xtime(c) ^ c) ^ d;
+    state[6] = a ^ b ^ xtime(c) ^ (xtime(d) ^ d);
+    state[7] = (xtime(a) ^ a) ^ b ^ c ^ xtime(d);
+
+    // Column 2 (Indices 8, 9, 10, 11)
+    a = state[8]; b = state[9]; c = state[10]; d = state[11];
+    state[8] = xtime(a) ^ (xtime(b) ^ b) ^ c ^ d;
+    state[9] = a ^ xtime(b) ^ (xtime(c) ^ c) ^ d;
+    state[10] = a ^ b ^ xtime(c) ^ (xtime(d) ^ d);
+    state[11] = (xtime(a) ^ a) ^ b ^ c ^ xtime(d);
+
+    // Column 3 (Indices 12, 13, 14, 15)
+    a = state[12]; b = state[13]; c = state[14]; d = state[15];
+    state[12] = xtime(a) ^ (xtime(b) ^ b) ^ c ^ d;
+    state[13] = a ^ xtime(b) ^ (xtime(c) ^ c) ^ d;
+    state[14] = a ^ b ^ xtime(c) ^ (xtime(d) ^ d);
+    state[15] = (xtime(a) ^ a) ^ b ^ c ^ xtime(d);
 }
 
+// Inverse MixColumns transformation: Each column is mixed using the inverse transformation
 void inv_mix_columns_unrolled(uint8_t state[16]) {
     uint8_t a, b, c, d;
-    for(int i=0; i<16; i+=4) {
-        a = state[i]; b = state[i+1]; c = state[i+2]; d = state[i+3];
-        state[i]   = mul14(a) ^ mul11(b) ^ mul13(c) ^ mul9(d);
-        state[i+1] = mul9(a)  ^ mul14(b) ^ mul11(c) ^ mul13(d);
-        state[i+2] = mul13(a) ^ mul9(b)  ^ mul14(c) ^ mul11(d);
-        state[i+3] = mul11(a) ^ mul13(b) ^ mul9(c)  ^ mul14(d);
-    }
+
+    // Column 0
+    a = state[0]; b = state[1]; c = state[2]; d = state[3];
+    state[0] = mul14(a) ^ mul11(b) ^ mul13(c) ^ mul9(d);
+    state[1] = mul9(a)  ^ mul14(b) ^ mul11(c) ^ mul13(d);
+    state[2] = mul13(a) ^ mul9(b)  ^ mul14(c) ^ mul11(d);
+    state[3] = mul11(a) ^ mul13(b) ^ mul9(c)  ^ mul14(d);
+
+    // Column 1
+    a = state[4]; b = state[5]; c = state[6]; d = state[7];
+    state[4] = mul14(a) ^ mul11(b) ^ mul13(c) ^ mul9(d);
+    state[5] = mul9(a)  ^ mul14(b) ^ mul11(c) ^ mul13(d);
+    state[6] = mul13(a) ^ mul9(b)  ^ mul14(c) ^ mul11(d);
+    state[7] = mul11(a) ^ mul13(b) ^ mul9(c)  ^ mul14(d);
+
+    // Column 2
+    a = state[8]; b = state[9]; c = state[10]; d = state[11];
+    state[8] = mul14(a) ^ mul11(b) ^ mul13(c) ^ mul9(d);
+    state[9] = mul9(a)  ^ mul14(b) ^ mul11(c) ^ mul13(d);
+    state[10] = mul13(a) ^ mul9(b)  ^ mul14(c) ^ mul11(d);
+    state[11] = mul11(a) ^ mul13(b) ^ mul9(c)  ^ mul14(d);
+
+    // Column 3
+    a = state[12]; b = state[13]; c = state[14]; d = state[15];
+    state[12] = mul14(a) ^ mul11(b) ^ mul13(c) ^ mul9(d);
+    state[13] = mul9(a)  ^ mul14(b) ^ mul11(c) ^ mul13(d);
+    state[14] = mul13(a) ^ mul9(b)  ^ mul14(c) ^ mul11(d);
+    state[15] = mul11(a) ^ mul13(b) ^ mul9(c)  ^ mul14(d);
 }
 
+// AddRoundKey transformation: Each byte of the state is XORed with the corresponding byte of the round
 void add_round_key_unrolled(uint8_t state[16], const uint8_t roundKey[16]) {
-    for(int i=0; i<16; i++) state[i] ^= roundKey[i];
+    state[0]  ^= roundKey[0];
+    state[1]  ^= roundKey[1];
+    state[2]  ^= roundKey[2];
+    state[3]  ^= roundKey[3];
+    state[4]  ^= roundKey[4];
+    state[5]  ^= roundKey[5];
+    state[6]  ^= roundKey[6];
+    state[7]  ^= roundKey[7];
+    state[8]  ^= roundKey[8];
+    state[9]  ^= roundKey[9];
+    state[10] ^= roundKey[10];
+    state[11] ^= roundKey[11];
+    state[12] ^= roundKey[12];
+    state[13] ^= roundKey[13];
+    state[14] ^= roundKey[14];
+    state[15] ^= roundKey[15];
 }
-
-// --- High Level Functions ---
 
 void aes_encrypt(uint8_t state[16], uint8_t roundKeys[11][16]) {
     add_round_key_unrolled(state, roundKeys[0]);
@@ -163,7 +227,7 @@ void print_state(const char* label, uint8_t state[16]) {
 }
 
 int main() {
-    // --- INTEGRATED TEST DATA ---
+    // Test vector
     uint8_t plaintext[16] = {
         0x32, 0x43, 0xf6, 0xa8, 0x88, 0x5a, 0x30, 0x8d, 
         0x31, 0x31, 0x98, 0xa2, 0xe0, 0x37, 0x07, 0x34
@@ -211,7 +275,6 @@ int main() {
 
     get_time(&start);
     for (int i = 0; i < ITERATIONS; i++) {
-        // state already contains a ciphertext from the previous loop
         aes_decrypt(state, roundKeys_1d);
     }
     get_time(&end);
