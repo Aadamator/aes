@@ -1,10 +1,9 @@
 add_library(aes_lib
     STATIC
-    constants.c
     gf.c
     keys.c
+    matrix.c
     s_box.c
-    state_utils.c
 )
 
 # export the headers
