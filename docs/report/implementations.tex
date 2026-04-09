@@ -109,17 +109,13 @@ Finally, a concluding \texttt{add\_round\_key} (much like round 0 in the encrypt
 
 This section describes the architectural and logic level changes made when transitioning from the naive AES version to an optimized version using a flattened state representation and loop unrolling. The goal of these changes was to reduce instruction overhead and improve execution efficiency.
 
-\subsubsection{State}
-
 The first optimization involved flattening the AES state from a two dimensional array (uint8\_t state[4][4]) into a contiguous one dimensional array (uint8\_t state[16]). Although multidimensional arrays are already stored linearly in memory, the flat representation simplifies indexing and produces more predictable memory access patterns in performance critical code. Since modern processors load memory in cache line sized blocks (typically 64 bytes), the entire 16 byte AES state fits within a single cache line, improving spatial locality and enabling more efficient register usage and compiler optimization during round transformations.
-
-\subsubsection{Loops}
 
 The second optimization involved manually unrolling loops in the AES operation functions. In the naive implementation, these operations relied on nested loops that introduced additional instructions for counter updates, comparisons, and conditional branching. Loop unrolling exposes more independent instructions to the processor, improving instruction scheduling, register reuse, and instruction level parallelism, which increases overall efficiency.
 
-\subsubsection{xtime}
-
 A third optimization targeted the mix\_columns and inv\_mix\_columns transformations. Instead of using a general purpose multiplication routine in the finite field $GF(2^8)$, the optimized implementation replaces these operations with fixed sequences of operations tailored to the specific coefficients required by AES. In particular, multiplication by 0x02 is implemented using the xtime operation, and multiplication by other constants is constructed from combinations of this primitive and XOR operations based on the tables in \ref{fig:mix_columns_tables}. The new state is calculated from the multiplication of values from the old state and values from the tables in \ref{fig:mix_columns_tables}.
+
+These changes transform the implementation from a readable version into a performance oriented version that reduces overhead, and increases instruction level parallelism, which improve the overall efficiency.
 
 \begin{figure}[H]
     \centering
@@ -131,10 +127,6 @@ A third optimization targeted the mix\_columns and inv\_mix\_columns transformat
 \subsubsection{Encryption/Decryption}
 
 Encryption and decryption works the same as described before in the naive version apart from the flattened state.
-
-\subsubsection{Conclusion}
-
-These changes transform the implementation from a readable version into a performance oriented version that reduces overhead, and increases instruction level parallelism. These optimizations improve the overall efficiency for encryption by around 50\%.
 
 \subsection{Implementation of AES-128 using T-tables}
 
