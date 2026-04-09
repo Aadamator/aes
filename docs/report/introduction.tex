@@ -1,3 +1,7 @@
-Each implementation is written in C, chosen not only because it keeps the code close to the reference specification while still being amenable to low-level optimizations, but also because all members of the group have some familiarity with the language. Using C also allows us to be more platform independent.
+The Advanced Encryption Standard (AES) is a widely used symmetric block cipher that encrypts data in fixed-size blocks through a sequence of round transformations. This report traces how our initial “naive” AES implementation was iteratively refined, with a focus on improving efficiency across each version.
 
-We adopted a unit test–driven approach to our AES‑128 implementations, where tests are written alongside the code and drive the structure of the design.
+Each implementation was written in C, which was chosen because it keeps the code close to the reference specification while still allowing low-level optimizations, each member of group was already familiar with it, and because it is relatively platform-independent.
+
+To verify correctness, each implementation was tested against a known plaintext and its corresponding ciphertext, which served as test vectors throughout development. 
+
+Finally, the performance of each implementation was benchmarked against a production-grade AES-128 library to evaluate how the optimizations affected efficiency in practice.
