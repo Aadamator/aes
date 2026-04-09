@@ -22,10 +22,10 @@
  * │ p3  │ p7  │ p11 │ p15 │
  * └─────┴─────┴─────┴─────┘
  *
- * @param bytes     16-byte block to map to the matrix.
+ * @param array     16-byte block to map to the matrix.
  * @param matrix    4x4 matrix to map from the bytes.
  */
-void map_from_bytes(const uint8_t bytes[16], uint8_t matrix[4][4]);
+void matrix_from_array(const uint8_t array[16], uint8_t matrix[4][4]);
 
 /**
  * @brief Maps the contents of a 4x4 matrix to a 16-byte block.
@@ -47,6 +47,6 @@ void map_from_bytes(const uint8_t bytes[16], uint8_t matrix[4][4]);
  * [p0, p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15]
  *
  * @param matrix    4x4 matrix to map to the bytes.
- * @param bytes     16-byte block to map from the matrix.
+ * @param array     16-byte block to map from the matrix.
  */
-void map_to_bytes(const uint8_t matrix[4][4], uint8_t bytes[16]);
+void matrix_to_array(const uint8_t matrix[4][4], uint8_t array[16]);

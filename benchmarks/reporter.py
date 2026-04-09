@@ -35,11 +35,11 @@ def aggregate_reports(files: list[str]) -> list[dict]:
         }
 
         for benchmark in data.get("benchmarks", []):
-            name = benchmark["name"]
+            name = benchmark["name"].split("/")[0] # the name will be in the format "Naive/iterations:1000000/repeats:30"
 
             if benchmark["run_type"] == "iteration":
                 if result["name"] is None:
-                    result["name"] = benchmark["run_name"]
+                    result["name"] = benchmark["run_name"].split("/")[0]
 
                 if result["repetitions"] is None:
                     result["repetitions"] = benchmark["repetitions"]
