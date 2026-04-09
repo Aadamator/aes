@@ -6,9 +6,9 @@
  * @brief XOR the incoming ciphertext with the round key.
  *
  * @param round_key     16-byte round key.
- * @param state         4x4 matrix representing the current state of the 16-byte ciphertext.
+ * @param state         The current state of the 16-byte ciphertext.
  */
-void add_round_key(const uint8_t round_key[16], uint8_t state[4][4]);
+void add_round_key(const uint8_t round_key[16], uint8_t state[16]);
 
 /**
  * @brief Decrypts a single 16-byte block using optimizations, applying the inverse operations of
@@ -43,27 +43,41 @@ int encrypt(
 /**
  * @brief Inverse mix columns operation.
  *
- * @param state         4x4 matrix representing the current state of the 16-byte ciphertext.
+ * @param state         The current state of the 16-byte ciphertext.
  */
-void inverse_mix_columns(uint8_t state[4][4]);
+void inverse_mix_columns(uint8_t state[16]);
 
 /**
  * @brief Inverse shift rows operation.
  *
- * @param state         4x4 matrix representing the current state of the 16-byte ciphertext.
+ * @param state         The current state of the 16-byte ciphertext.
  */
-void inverse_shift_rows(uint8_t state[4][4]);
+void inverse_shift_rows(uint8_t state[16]);
+
+/**
+ * @brief Inverse sub bytes operation.
+ *
+ * @param state         The current state of the 16-byte ciphertext.
+ */
+void inverse_sub_bytes(uint8_t state[16]);
+
+/**
+ * @brief Sub bytes operation.
+ *
+ * @param state         The current state of the 16-byte ciphertext.
+ */
+void sub_bytes(uint8_t state[16]);
 
 /**
  * @brief Mix the four bytes of every column in a linear way.
  *
- * @param state         4x4 matrix representing the current state of the 16-byte ciphertext.
+ * @param state         The current state of the 16-byte ciphertext.
  */
-void mix_columns(uint8_t state[4][4]);
+void mix_columns(uint8_t state[16]);
 
 /**
  * @brief Row 0 remains unchanged, but the other three rows are shifted a variable amount.
  *
- * @param state         4x4 matrix representing the current state of the 16-byte ciphertext.
+ * @param state         The current state of the 16-byte ciphertext.
  */
-void shift_rows(uint8_t state[4][4]);
+void shift_rows(uint8_t state[16]);

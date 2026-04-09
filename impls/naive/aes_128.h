@@ -55,6 +55,13 @@ void inverse_mix_columns(uint8_t state[4][4]);
 void inverse_shift_rows(uint8_t state[4][4]);
 
 /**
+ * @brief Inverse of the sub bytes operation.
+ *
+ * @param state         4x4 matrix representing the current state of the 16-byte ciphertext.
+ */
+void inverse_sub_bytes(uint8_t state[4][4]);
+
+/**
  * @brief Mix the four bytes of every column in a linear way.
  *
  * @param state         4x4 matrix representing the current state of the 16-byte ciphertext.
@@ -67,3 +74,10 @@ void mix_columns(uint8_t state[4][4]);
  * @param state         4x4 matrix representing the current state of the 16-byte ciphertext.
  */
 void shift_rows(uint8_t state[4][4]);
+
+/**
+ * @brief Substitute each byte of the state with another byte according to a lookup table.
+ *
+ * @param state         4x4 matrix representing the current state of the 16-byte ciphertext.
+ */
+void sub_bytes(uint8_t state[4][4]);
