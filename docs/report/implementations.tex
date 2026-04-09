@@ -71,6 +71,8 @@ The core of the encryption process is broken into four distinct operations:
 
 \end{itemize}
 
+\subsubsection{Encryption}
+
 We start with round 0, which simply applies an initial \texttt{add\_round\_key} operation.
 
 Following the initial key addition, the state undergoes nine identical ordinary rounds. Each round applies the four transformations mentioned above in the sequence shown in \ref{fig:encryption_round}.
@@ -142,96 +144,3 @@ Once the computation is finished, the resulting ciphertext is copied back to mem
 As with encryption, decryption follows the same overall idea, but using the inverse hardware instructions. The ciphertext is loaded into a register, combined with the last round key, and then processed through \texttt{\_mm\_aesdec\_si128} for the intermediate rounds. Finally, the special \texttt{\_mm\_aesdeclast\_si128} instruction is used for the last round to omit the inverse mix columns step. Before those intermediate decryption rounds, each round key is transformed with \texttt{\_mm\_aesimc\_si128}, because the decryption instructions expect the keys in a form adapted to the inverse round structure.
 
 Similar to the encryption process, once the computation is finished, the resulting plaintext is copied back to memory using \texttt{\_mm\_storeu\_si128}.
-
-
-\subsection{Benchmarking}
-
-To evaluate the performance of our four AES-128 implementations, we utilized Google's Benchmark framework \cite{google_benchmark} to measure single-block encryption latency. All benchmarks were compiled with compiler optimizations enabled to reflect realistic, production-level execution speeds. Furthermore, the benchmarking measurements explicitly isolate the encryption/decryption phases, entirely excluding the key-schedule generation process (this is performed once per run to avoid unnecessary overhead).
-
-Each implementation was configured to run for 1,000,000 iterations per test. To ensure the processor cache was properly warmed up and to obtain statistically robust results, we set the framework to perform 30 repetitions of these tests. From these repetitions, we recorded both the mean and median latencies (measured in nanoseconds per operation, ns/op). The mean provides the average performance across all runs, which is sensitive to occasional system outliers. The median gives a more robust central tendency by discarding extreme measurements caused by OS interruptions, making it an ideal metric for comparing consistent, real-world performance.
-
-To serve as a baseline for comparison against a production-grade implementation, we also benchmarked the AES-128 single-block encryption routine from the Mbed TLS library \cite{mbedtls_library}. The performance profiles for both encryption and decryption across all implementations are summarized and compared in the tables below.
-
-The benchmarking was run on a Dell XPS 15 9520 using a 12th Gen Intel Core i9-12900HK CPU.
-
-\begin{table}[H]
-    \caption{Benchmark results for the encryption implementations.}
-    \label{benchmark_encryption_table}
-    \begin{center}
-        \begin{tabular}{|l|r|r|r|}
-            \hline
-                \textbf{Implementation} &
-                \textbf{Mean} &
-                \textbf{Median} &
-                \textbf{Std Deviation} \\ [0.5ex]
-            \hline\hline
-                Naive &
-                629.323 ns/op &
-                623.394 ns/op &
-                20.574 ns \\
-            \hline
-                Optimized &
-                340.565 ns/op &
-                337.087 ns/op &
-                10.642 ns \\
-            \hline
-                Using T-tables &
-                47.110 ns/op &
-                47.486 ns/op &
-                1.165 ns \\
-            \hline
-                NI Instructions &
-                1.451 ns/op &
-                1.460 ns/op &
-                0.056 ns \\
-            \hline
-                Library (Mbed-TLS) &
-                5.305 ns/op &
-                5.317 ns/op &
-                0.807 ns \\
-            \hline
-        \end{tabular}
-    \end{center}
-\end{table}
-
-\begin{table}[H]
-    \caption{Benchmark results for the decryption implementations.}
-    \label{benchmark_decryption_table}
-    \begin{center}
-        \begin{tabular}{|l|r|r|r|}
-            \hline
-                \textbf{Implementation} &
-                \textbf{Mean} &
-                \textbf{Median} &
-                \textbf{Std Deviation} \\ [0.5ex]
-            \hline\hline
-                Naive &
-                - ns/op &
-                - ns/op &
-                - ns \\
-            \hline
-                Optimized &
-                - ns/op &
-                - ns/op &
-                - ns \\
-            \hline
-                Using T-tables &
-                - ns/op &
-                - ns/op &
-                - ns \\
-            \hline
-                NI Instructions &
-                - ns/op &
-                - ns/op &
-                - ns \\
-            \hline
-                Library (Mbed-TLS) &
-                - ns/op &
-                - ns/op &
-                - ns \\
-            \hline
-        \end{tabular}
-    \end{center}
-\end{table}
-
-% Discuss the results here
