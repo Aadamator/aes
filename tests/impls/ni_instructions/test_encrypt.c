@@ -6,8 +6,6 @@
 
 #include "impls/ni_instructions/aes_128.h"
 #include "keys.h"
-#include "matrix.h"
-#include "s_box.h"
 #include "../../utilities/constants.h"
 
 /**
