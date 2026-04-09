@@ -12,7 +12,7 @@ This makes the implementation closely follow the "textbook" structure and our un
 
 \subsubsection{Encryption}
 
-Before the encryption process, a set of key schedules are pre-computed.
+Before the encryption process, a set of key schedules are pre-computed and passed to the encryption algorithm.
 
 The encryption process begins by mapping a 16-byte plaintext array to a $4 \times 4$ matrix. This matrix is what we have aptly named the "state" and is what we will perform the operations upon. Each byte is arranged in the following form:
 
@@ -42,7 +42,7 @@ The core of the encryption process is broken into four distinct operations:
         \label{fig:add_round_key}
     \end{figure}
 
-    \item \texttt{sub\_bytes}: A non-linear substitution step where each byte in the state is replaced with a corresponding byte from a fixed lookup table (the S-box).
+    \item \texttt{sub\_bytes}: This is a simple substitution step in which each byte in the matrix state is replaced by a corresponding byte from the fixed S-box lookup table.
 
     \begin{figure}[H]
         \centering
@@ -51,7 +51,7 @@ The core of the encryption process is broken into four distinct operations:
         \label{fig:sub_bytes}
     \end{figure}
 
-    \item \textbf{shift\_rows}: A transposition step that cyclically shifts the bytes in the last three rows of the state by varying offsets. The first row remains unchanged, while the second, third, and fourth rows are shifted to the left by one, two, and three bytes, respectively.
+    \item \textbf{shift\_rows}: This step shifts the bytes in the last three rows of the state by varying offsets; the first row remains unchanged, while the second, third, and fourth rows are shifted to the left by one, two, and three bytes, respectively.
 
     \begin{figure}[H]
         \centering
@@ -60,7 +60,7 @@ The core of the encryption process is broken into four distinct operations:
         \label{fig:shift_rows}
     \end{figure}
 
-    \item \textbf{mix\_columns}: A linear mixing operation where each column of the state is treated as a polynomial over the Galois Field $\text{GF}(2^8)$ and multiplied by a fixed matrix. This step provides critical diffusion to the cipher.
+    \item \textbf{mix\_columns}: This step is where much of the diffusion of the ciphertext takes place. It takes each column of the matrix state and treats it as a polynomial over the Galois Field $\text{GF}(2^8)$ and multiplies by a fixed matrix.
 
     \begin{figure}[H]
         \centering
@@ -109,11 +109,11 @@ Finally, a concluding \texttt{add\_round\_key} (much like round 0 in the encrypt
 
 This section describes the architectural and logic level changes made when transitioning from the naive AES version to an optimized version using a flattened state representation and loop unrolling. The goal of these changes was to reduce instruction overhead and improve execution efficiency.
 
-The first optimization involved flattening the AES state from a two dimensional array (uint8\_t state[4][4]) into a contiguous one dimensional array (uint8\_t state[16]). Although multidimensional arrays are already stored linearly in memory, the flat representation simplifies indexing and produces more predictable memory access patterns in performance critical code. Since modern processors load memory in cache line sized blocks (typically 64 bytes), the entire 16 byte AES state fits within a single cache line, improving spatial locality and enabling more efficient register usage and compiler optimization during round transformations.
+The first optimization involved flattening the AES state from a two dimensional array (uint8\_t state[4][4]) into a one dimensional array (uint8\_t state[16]). Although multidimensional arrays are already stored linearly in memory, the flat representation simplifies indexing and produces more predictable memory access patterns in performance critical code. Since modern processors load memory in cache line sized blocks (typically 64 bytes), the entire 16 byte AES state fits within a single cache line, improving spatial locality and enabling more efficient register usage and compiler optimization during round transformations.
 
 The second optimization involved manually unrolling loops in the AES operation functions. In the naive implementation, these operations relied on nested loops that introduced additional instructions for counter updates, comparisons, and conditional branching. Loop unrolling exposes more independent instructions to the processor, improving instruction scheduling, register reuse, and instruction level parallelism, which increases overall efficiency.
 
-A third optimization targeted the mix\_columns and inv\_mix\_columns transformations. Instead of using a general purpose multiplication routine in the finite field $GF(2^8)$, the optimized implementation replaces these operations with fixed sequences of operations tailored to the specific coefficients required by AES. In particular, multiplication by 0x02 is implemented using the xtime operation, and multiplication by other constants is constructed from combinations of this primitive and XOR operations based on the tables in \ref{fig:mix_columns_tables}. The new state is calculated from the multiplication of values from the old state and values from the tables in \ref{fig:mix_columns_tables}.
+The third optimization targeted the \texttt{mix\_columns} and \texttt{inv\_mix\_columns} transformations. In the naive implementation, the \texttt{mix\_columns} transformation used a general finite field multiplication routine based on logarithmic lookup tables, which introduced additional memory accesses and control overhead. In the optimized version, these operations were replaced with fixed combinations of shift and XOR operations using the \texttt{xtime} primitive. Using this \texttt{xtime} operation, multiplication by 0x02 is implemented and multiplication by other constants is constructed from combinations of this primitive and XOR operations based on the tables in \ref{fig:mix_columns_tables}. This reduces memory usage and instruction overhead, allowing the transformation to execute more efficiently on the CPU.
 
 These changes transform the implementation from a readable version into a performance oriented version that reduces overhead, and increases instruction level parallelism, which improve the overall efficiency.
 
@@ -135,7 +135,7 @@ The T-tables approach for AES is a software optimization that merges SubBytes, S
 
 \subsubsection{Encryption}
 
-For encryption, four T-tables T0-T3 are used to represent the combined SubBytes, ShiftRows and MixColumns operations for each byte position in a 32-bit column. For each state, the four bytes are used as indices into the corresponding T-tables and outputs are Xored together. The final step is XORing it with RoundKey. By combining multiple transformations into a single table lookup per byte, each round of encryption requires only four table look ups per column and XOR operations.
+For encryption, four T-tables T0-T3 are used to represent the combined SubBytes, ShiftRows and MixColumns operations for each byte position in a 32-bit column. For each state, the four bytes are used as indices into the corresponding T-tables and outputs are XORed together. The final step is XORing it with RoundKey. By combining multiple transformations into a single table lookup per byte, each round of encryption requires only four table look ups per column and XOR operations.
 
 
 \subsubsection{Decryption}
