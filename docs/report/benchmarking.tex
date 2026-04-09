@@ -1,10 +1,16 @@
+\subsubsection{Setup}
+
 To evaluate the performance of our four AES-128 implementations, we utilized Google's Benchmark framework \cite{google_benchmark} to measure single-block encryption latency. All benchmarks were compiled with compiler optimizations enabled to reflect realistic, production-level execution speeds. Furthermore, the benchmarking measurements explicitly isolate the encryption/decryption phases, entirely excluding the key-schedule generation process (this is performed once per run to avoid unnecessary overhead).
 
 Each implementation was configured to run for 1,000,000 iterations per test. To ensure the processor cache was properly warmed up and to obtain statistically robust results, we set the framework to perform 30 repetitions of these tests. From these repetitions, we recorded both the mean and median latencies (measured in nanoseconds per operation, ns/op). The mean provides the average performance across all runs, which is sensitive to occasional system outliers. The median gives a more robust central tendency by discarding extreme measurements caused by OS interruptions, making it an ideal metric for comparing consistent, real-world performance.
 
-To serve as a baseline for comparison against a production-grade implementation, we also benchmarked the AES-128 single-block encryption routine from the Mbed TLS library \cite{mbedtls_library}. The performance profiles for both encryption and decryption across all implementations are summarized and compared in the tables below.
+To serve as a baseline for comparison against a production-grade implementation, we also benchmarked the AES-128 single-block encryption routine from the Mbed TLS library \cite{mbedtls_library}.
 
 The benchmarking was run on a Dell XPS 15 9520 using a 12th Gen Intel Core i9-12900HK CPU.
+
+\subsubsection{Results}
+
+The performance profiles for both encryption and decryption across all implementations are summarized and compared in the tables below.
 
 \begin{table}[H]
     \caption{Benchmark results for the encryption implementations.}
@@ -86,4 +92,6 @@ The benchmarking was run on a Dell XPS 15 9520 using a 12th Gen Intel Core i9-12
     \end{center}
 \end{table}
 
-% Discuss the results here
+The initial naive implementation serves as a baseline, while later versions reduce computational overhead through more efficient handling of the AES round operations and related data structures. The benchmark results show that the optimized version achieved a 1.85x speedup, the T-tables version a 13.35x speedup, and the NI-based implementation a 433.8x speedup - relative to the naive implementation. By comparison, the library is 118.7x faster than the naive version, although the AES-NI implementation still exceeds the library’s performance by a factor of 3.66. 
+
+Taken together, these results indicate a clear progression from a straightforward software implementation to increasingly efficient approaches, with hardware-assisted AES-NI delivering the strongest improvement.
