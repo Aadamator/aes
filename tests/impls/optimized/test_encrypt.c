@@ -44,7 +44,7 @@ static void test_single_round(
         round_state->s_box,
         strlen(round_state->s_box),
         NULL, NULL, NULL);
-    optimized_sub_bytes(state);
+    sub_bytes(state);
     assert_round_state(expected, state, round, "s_box");
 
     // R[n].s_row
@@ -123,7 +123,6 @@ static void test_encrypt(void) {
  * Runs a test for each round and checks the state at each step of the encryption process.
  */
 static void test_encrypt_rounds() {
-    uint8_t start[16] = {0};
     uint8_t ciphertext[16] = {0};
     uint8_t expected[16] = {0};
     uint8_t key[16] = {0};

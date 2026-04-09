@@ -59,14 +59,14 @@ void inverse_shift_rows(uint8_t state[16]);
  *
  * @param state         The current state of the 16-byte ciphertext.
  */
-void optimized_inverse_sub_bytes(uint8_t state[16]);
+void inverse_sub_bytes(uint8_t state[16]);
 
 /**
  * @brief Sub bytes operation.
  *
  * @param state         The current state of the 16-byte ciphertext.
  */
-void optimized_sub_bytes(uint8_t state[16]);
+void sub_bytes(uint8_t state[16]);
 
 /**
  * @brief Mix the four bytes of every column in a linear way.
@@ -81,5 +81,3 @@ void mix_columns(uint8_t state[16]);
  * @param state         The current state of the 16-byte ciphertext.
  */
 void shift_rows(uint8_t state[16]);
-
-

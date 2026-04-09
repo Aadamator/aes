@@ -7,7 +7,6 @@
 #include "impls/naive/aes_128.h"
 #include "keys.h"
 #include "matrix.h"
-#include "s_box.h"
 #include "../../utilities/assertations.h"
 #include "../../utilities/constants.h"
 #include "../../utilities/macros.h"

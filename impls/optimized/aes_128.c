@@ -30,13 +30,13 @@ int decrypt(const uint8_t key_schedules[11][16], const uint8_t ciphertext[16], u
     memcpy(state, ciphertext, 16);
 
     add_round_key(key_schedules[10], state);
-    optimized_inverse_sub_bytes(state);
+    inverse_sub_bytes(state);
     inverse_shift_rows(state);
 
     for (int round = 9; round > 0; --round) {
         add_round_key(key_schedules[round], state);
         inverse_mix_columns(state);
-        optimized_inverse_sub_bytes(state);
+        inverse_sub_bytes(state);
         inverse_shift_rows(state);
     }
     add_round_key(key_schedules[0], state);
@@ -56,14 +56,14 @@ int encrypt(const uint8_t key_schedules[11][16], const uint8_t plaintext[16], ui
 
     // rounds 1-9 are ordinary rounds
     for (int round = 1; round < 10; round++) {
-        optimized_sub_bytes(state);
+        sub_bytes(state);
         shift_rows(state);
         mix_columns(state);
         add_round_key(key_schedules[round], state);
     }
 
     // last round is special: there is no mix_columns
-    optimized_sub_bytes(state);
+    sub_bytes(state);
     shift_rows(state);
     add_round_key(key_schedules[10], state);
 
@@ -124,6 +124,13 @@ void inverse_shift_rows(uint8_t state[16]) {
 
 }
 
+void inverse_sub_bytes(uint8_t state[16]) {
+    state[0] = inverse_s_box[state[0]];   state[1] = inverse_s_box[state[1]];   state[2] = inverse_s_box[state[2]];   state[3] = inverse_s_box[state[3]];
+    state[4] = inverse_s_box[state[4]];   state[5] = inverse_s_box[state[5]];   state[6] = inverse_s_box[state[6]];   state[7] = inverse_s_box[state[7]];
+    state[8] = inverse_s_box[state[8]];   state[9] = inverse_s_box[state[9]];   state[10] = inverse_s_box[state[10]]; state[11] = inverse_s_box[state[11]];
+    state[12] = inverse_s_box[state[12]]; state[13] = inverse_s_box[state[13]]; state[14] = inverse_s_box[state[14]]; state[15] = inverse_s_box[state[15]];
+}
+
 void mix_columns(uint8_t state[16]) {
     uint8_t a, b, c, d;
 
@@ -156,24 +163,17 @@ void mix_columns(uint8_t state[16]) {
     state[15] = (xtime(a) ^ a) ^ b ^ c ^ xtime(d);
 }
 
-void optimized_inverse_sub_bytes(uint8_t state[16]) {
-    state[0] = inverse_s_box[state[0]];   state[1] = inverse_s_box[state[1]];   state[2] = inverse_s_box[state[2]];   state[3] = inverse_s_box[state[3]];
-    state[4] = inverse_s_box[state[4]];   state[5] = inverse_s_box[state[5]];   state[6] = inverse_s_box[state[6]];   state[7] = inverse_s_box[state[7]];
-    state[8] = inverse_s_box[state[8]];   state[9] = inverse_s_box[state[9]];   state[10] = inverse_s_box[state[10]]; state[11] = inverse_s_box[state[11]];
-    state[12] = inverse_s_box[state[12]]; state[13] = inverse_s_box[state[13]]; state[14] = inverse_s_box[state[14]]; state[15] = inverse_s_box[state[15]];
-}
-
-void optimized_sub_bytes(uint8_t state[16]) {
-    state[0] = s_box[state[0]];   state[1] = s_box[state[1]];   state[2] = s_box[state[2]];   state[3] = s_box[state[3]];
-    state[4] = s_box[state[4]];   state[5] = s_box[state[5]];   state[6] = s_box[state[6]];   state[7] = s_box[state[7]];
-    state[8] = s_box[state[8]];   state[9] = s_box[state[9]];   state[10] = s_box[state[10]]; state[11] = s_box[state[11]];
-    state[12] = s_box[state[12]]; state[13] = s_box[state[13]]; state[14] = s_box[state[14]]; state[15] = s_box[state[15]];
-}
-
 void shift_rows(uint8_t state[16]) {
     uint8_t tmp;
     tmp = state[1]; state[1] = state[5]; state[5] = state[9]; state[9] = state[13]; state[13] = tmp;
     tmp = state[2]; state[2] = state[10]; state[10] = tmp;
     tmp = state[6]; state[6] = state[14]; state[14] = tmp;
     tmp = state[3]; state[3] = state[15]; state[15] = state[11]; state[11] = state[7]; state[7] = tmp;
+}
+
+void sub_bytes(uint8_t state[16]) {
+    state[0] = s_box[state[0]];   state[1] = s_box[state[1]];   state[2] = s_box[state[2]];   state[3] = s_box[state[3]];
+    state[4] = s_box[state[4]];   state[5] = s_box[state[5]];   state[6] = s_box[state[6]];   state[7] = s_box[state[7]];
+    state[8] = s_box[state[8]];   state[9] = s_box[state[9]];   state[10] = s_box[state[10]]; state[11] = s_box[state[11]];
+    state[12] = s_box[state[12]]; state[13] = s_box[state[13]]; state[14] = s_box[state[14]]; state[15] = s_box[state[15]];
 }
