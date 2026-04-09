@@ -36,27 +36,3 @@ const uint8_t s_box[256] = {
     0xE1, 0xF8, 0x98, 0x11, 0x69, 0xD9, 0x8E, 0x94, 0x9B, 0x1E, 0x87, 0xE9, 0xCE, 0x55, 0x28, 0xDF,
     0x8C, 0xA1, 0x89, 0x0D, 0xBF, 0xE6, 0x42, 0x68, 0x41, 0x99, 0x2D, 0x0F, 0xB0, 0x54, 0xBB, 0x16
 };
-
-/**
- * @brief Performs the lookup but takes an S-box as reference, i.e. either the normal or the
- * inverse.
- *
- * @param s_box_ref     256-byte S-box look-up table.
- * @param state         4x4 matrix representing the current state of the 16-byte ciphertext.
- */
-static void _sub_bytes(const uint8_t s_box_ref[256], uint8_t state[4][4]) {
-    for(int i = 0; i < 4; i++){
-        state[i][0] = s_box_ref[state[i][0]];
-        state[i][1] = s_box_ref[state[i][1]];
-        state[i][2] = s_box_ref[state[i][2]];
-        state[i][3] = s_box_ref[state[i][3]];
-    }
-}
-
-void inverse_sub_bytes(uint8_t state[4][4]) {
-    _sub_bytes(inverse_s_box, state);
-}
-
-void sub_bytes(uint8_t state[4][4]) {
-    _sub_bytes(s_box, state);
-}

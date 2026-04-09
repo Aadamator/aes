@@ -9,6 +9,22 @@
 static const int nb = 4;  // Nb = 4 (number of columns) for 16-byte (128-bit)
 static const uint8_t shifts[4] = {0, 1, 2, 3}; // Nb = 4 (AES-128)
 
+/**
+ * @brief Performs the lookup but takes an S-box as reference, i.e. either the normal or the
+ * inverse.
+ *
+ * @param s_box_ref     256-byte S-box look-up table.
+ * @param state         4x4 matrix representing the current state of the 16-byte ciphertext.
+ */
+static void _sub_bytes(const uint8_t s_box_ref[256], uint8_t state[4][4]) {
+    for(int i = 0; i < 4; i++){
+        state[i][0] = s_box_ref[state[i][0]];
+        state[i][1] = s_box_ref[state[i][1]];
+        state[i][2] = s_box_ref[state[i][2]];
+        state[i][3] = s_box_ref[state[i][3]];
+    }
+}
+
 void add_round_key(const uint8_t round_key[16], uint8_t state[4][4]) {
     uint8_t round_key_matrix[4][4] = {0};
 
@@ -114,6 +130,10 @@ void inverse_shift_rows(uint8_t state[4][4]) {
     }
 }
 
+void inverse_sub_bytes(uint8_t state[4][4]) {
+    _sub_bytes(inverse_s_box, state);
+}
+
 void mix_columns(uint8_t state[4][4]) {
     int i;
     int j;
@@ -148,4 +168,8 @@ void shift_rows(uint8_t state[4][4]) {
             state[i][j] = tmp[j];
         }
     }
+}
+
+void sub_bytes(uint8_t state[4][4]) {
+    _sub_bytes(s_box, state);
 }
