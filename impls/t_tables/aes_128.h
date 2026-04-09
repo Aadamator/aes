@@ -37,6 +37,10 @@ int encrypt(
     uint8_t ciphertext[16]
 );
 
+void generate_inverse_tables(uint32_t tables[4][256]);
+
 void generate_tables(uint32_t tables[4][256]);
 
 void key_schedule(const uint8_t *key, uint32_t *roundkey);
+
+void reverse_round_keys(uint32_t *rk, uint32_t *inv_rk);
