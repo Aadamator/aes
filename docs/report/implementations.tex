@@ -152,41 +152,43 @@ Each implementation was configured to run for 1,000,000 iterations per test. To 
 
 To serve as a baseline for comparison against a production-grade implementation, we also benchmarked the AES-128 single-block encryption routine from the Mbed TLS library \cite{mbedtls_library}. The performance profiles for both encryption and decryption across all implementations are summarized and compared in the tables below.
 
+The benchmarking was run on a Dell XPS 15 9520 using a 12th Gen Intel Core i9-12900HK CPU.
+
 \begin{table}[H]
     \caption{Benchmark results for the encryption implementations.}
     \label{benchmark_encryption_table}
     \begin{center}
-        \begin{tabular}{|l|c|c|c|}
+        \begin{tabular}{|l|r|r|r|}
             \hline
                 \textbf{Implementation} &
-                \textbf{Mean Latency} &
-                \textbf{Median Latency} &
-                \textbf{Iterations} \\ [0.5ex]
+                \textbf{Mean} &
+                \textbf{Median} &
+                \textbf{Std Deviation} \\ [0.5ex]
             \hline\hline
                 Naive &
-                - ns/op &
-                - ns/op &
-                - \\
+                629.323 ns/op &
+                623.394 ns/op &
+                20.574 ns \\
             \hline
                 Optimized &
-                - ns/op &
-                - ns/op &
-                - \\
+                340.565 ns/op &
+                337.087 ns/op &
+                10.642 ns \\
             \hline
                 Using T-tables &
-                - ns/op &
-                - ns/op &
-                - \\
+                47.110 ns/op &
+                47.486 ns/op &
+                1.165 ns \\
             \hline
                 NI Instructions &
-                - ns/op &
-                - ns/op &
-                - \\
+                1.451 ns/op &
+                1.460 ns/op &
+                0.056 ns \\
             \hline
                 Library (Mbed-TLS) &
-                - ns/op &
-                - ns/op &
-                - \\
+                5.305 ns/op &
+                5.317 ns/op &
+                0.807 ns \\
             \hline
         \end{tabular}
     \end{center}
@@ -196,37 +198,37 @@ To serve as a baseline for comparison against a production-grade implementation,
     \caption{Benchmark results for the decryption implementations.}
     \label{benchmark_decryption_table}
     \begin{center}
-        \begin{tabular}{|l|c|c|c|}
+        \begin{tabular}{|l|r|r|r|}
             \hline
                 \textbf{Implementation} &
-                \textbf{Mean Latency} &
-                \textbf{Median Latency} &
-                \textbf{Iterations} \\ [0.5ex]
+                \textbf{Mean} &
+                \textbf{Median} &
+                \textbf{Std Deviation} \\ [0.5ex]
             \hline\hline
                 Naive &
                 - ns/op &
                 - ns/op &
-                - \\
+                - ns \\
             \hline
                 Optimized &
                 - ns/op &
                 - ns/op &
-                - \\
+                - ns \\
             \hline
                 Using T-tables &
                 - ns/op &
                 - ns/op &
-                - \\
+                - ns \\
             \hline
                 NI Instructions &
                 - ns/op &
                 - ns/op &
-                - \\
+                - ns \\
             \hline
                 Library (Mbed-TLS) &
                 - ns/op &
                 - ns/op &
-                - \\
+                - ns \\
             \hline
         \end{tabular}
     \end{center}
